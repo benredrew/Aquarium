@@ -1,3 +1,8 @@
+# Author: Claude (Sonnet 5)
+# Co-Author: Brendan Fennell
 .venv/
 __pycache__/
 *.pyc
+test_fits/output/
+led_sun_lid/output/
+led_ring_light/output/
