@@ -14,9 +14,9 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-OD = 167.0
-WALL = 2.0
-HEIGHT = 10.0
+OD = 180.0
+WALL = 1.0
+HEIGHT = 15.0
 ID = OD - 2 * WALL
 
 tube = labelled_ring(OD, WALL, HEIGHT)

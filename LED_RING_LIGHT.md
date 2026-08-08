@@ -44,6 +44,7 @@ Resulting envelope, measured from the ring axis along +Y:
 ## Notes
 
 - OD is the reference dimension for the lid hub bore. The lid drives its bore from `HUB_BORE` (currently 89.5mm) and derives the clearance from it — **0.1428mm diametral / 0.0714mm radial** — rather than padding the value recorded here. Keep this table nominal.
+- **Standard slip-fit bore: 89.5mm (0.1428mm diametral / 0.0714mm radial clearance over this OD).** Confirmed 2026-08-02 via the LED Sun Lid prototype (10.5mm-thickness revision, printed 2026-08-01) — fit perfectly. Use 89.5mm as the default bore diameter for any future part receiving this ring light.
 - The lid's cable passthrough is cut at **+Y (90°)**, midway between two spokes, with `PASSTHROUGH_CLEARANCE` 0.5mm radial. Because the light is installed by dropping it into the bore from above, the cut is the *vertical sweep* of the gland and cable up through the top face, not just their seated envelope — an envelope-shaped pocket would trap the gland on the way in.
 - Seating: the light rests on the lid's 2mm lip, putting its gland axis at z = 8.6675 in lid coordinates. Its 13.335 thickness then stands 4.835mm proud of the 10.5mm lid.
 - The lid is 10.5mm rather than a round 10mm so its top chamfer clears the passthrough pocket's tangent seam at z = 8.6675. At 10mm the chamfer started 0.33mm above that seam and pinched out slivers too short to blend, leaving the cable exit sharp.

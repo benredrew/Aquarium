@@ -17,7 +17,7 @@ ROOT = Path(__file__).parent
 
 LID_COLOR = (255, 165, 0)
 RING_COLOR = (0, 170, 70)
-ALPHA = 0.5  # same on both so the two read alike where they overlap
+ALPHA = 1.0  # solid
 
 
 def load_part(relative_path, name):
