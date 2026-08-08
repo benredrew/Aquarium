@@ -20,9 +20,13 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-OD = 180.0
+OD = 179.0
 HEIGHT = 20.0
 CORNER_RADIUS = 5.0
+# Working assumption for previews only: the tank is as tall as it is wide. Not a
+# measurement -- it is here so the lid and the cradle can be shown at plausible
+# heights relative to each other. See ../assembly.py.
+TANK_HEIGHT = OD
 
 base = cq.Workplane("XY").circle(OD / 2).extrude(HEIGHT)
 base = base.faces("<Z").edges().fillet(CORNER_RADIUS)

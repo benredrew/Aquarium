@@ -14,6 +14,12 @@ List sections from bottom to top (or top to bottom — pick one and stay consist
 |---------|---------|-----------|---------|-------------|-------|
 | Top opening |     |           | 167     |             | Confirmed 2026-08-01. Drives the outer diameter of the LED Sun Lid. |
 
+## Fit conventions
+
+- **Free fit on a vertical wall: 0.2mm radial.** A bore comes out 0.4mm over the shaft it takes. This is the default for any sliding or drop-in joint between vertical faces — the lid/screen joint uses it (`led_sun_lid/lid.py`, `SCREEN_CLEARANCE`) and so does the vessel cradle (`test_fits/bowl.py`, `CLEARANCE`). Confirmed as the house figure 2026-08-07; earlier cradle trials used 0.5mm radial, which is why the first printed cradle engraved a bore of 181 for a 180 vessel.
+- Clearance applies to **walls only**. Faces normal to Z are left tight where a part is meant to bed down or finish flush — see the screen lip sitting in the lid's rebate.
+- A slip fit into the vessel mouth is a separate case and takes **no** added clearance: see the standard slip-fit OD below.
+
 ## Notes
 
 - Top ID of 167mm is the reference dimension for any part that seats into the vessel mouth.
