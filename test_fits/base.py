@@ -1,11 +1,15 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Test-fit solid for the vessel base (see ../DIMENSIONS.md).
+"""Test-fit solid for the vessel base (see ../spec/vessel.md).
 
 A plain cylinder with its bottom edge filleted to CORNER_RADIUS, matching the
-rounded corner where the vessel's side wall meets its base. Iterated against
-the physical vessel to pin down the base OD and corner radius before the
-support structure is designed around it.
+rounded corner where the vessel's side wall meets its base. Iterated against the
+physical vessel until the cradle built from it fitted, which is what pinned the
+base OD and corner radius down.
+
+Both figures come from ../spec/vessel.md, not from literals here, because
+test_fits/bowl.py cuts its cavity from this model and a number changed in one
+place has to reach both. Change them in the document.
 """
 import sys
 from pathlib import Path
@@ -13,6 +17,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
+import specs
 from engrave import engrave_radial_text
 from ocp_vscode import show_object, set_port
 
@@ -20,9 +25,11 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-OD = 179.0
+OD = specs.figure("vessel", "base_od")
+CORNER_RADIUS = specs.figure("vessel", "base_corner_radius")
+# Not a vessel figure -- just enough height to hold the corner radius and give
+# something to grip while checking the fit, so it stays a literal.
 HEIGHT = 20.0
-CORNER_RADIUS = 5.0
 # Working assumption for previews only: the tank is as tall as it is wide. Not a
 # measurement -- it is here so the lid and the cradle can be shown at plausible
 # heights relative to each other. See ../assembly.py.

@@ -1,6 +1,6 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Test-fit ring for the vessel mouth (see ../DIMENSIONS.md)."""
+"""Test-fit ring for the vessel mouth (see ../spec/vessel.md)."""
 import sys
 from pathlib import Path
 

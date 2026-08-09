@@ -1,6 +1,6 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Mock model of the LED ring light itself (see ../LED_RING_LIGHT.md).
+"""Mock model of the LED ring light itself (see ../spec/led_ring_light.md).
 
 This is a reference component, not a printed part -- it exists so the lid and
 the test fits can be checked against the real envelope, including the cable
@@ -9,9 +9,13 @@ gland and cable that have to pass through the lid.
 Axes: ring primary axis is Z, ring sits z=0..THICKNESS. The gland and cable are
 coaxial and protrude along +Y at mid-thickness.
 """
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared specs
+
 import cadquery as cq
+import specs
 from cadquery.selectors import RadiusNthSelector
 from ocp_vscode import show_object, set_port
 
@@ -19,17 +23,17 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-MM_PER_IN = 25.4
-
-# --- Manufacturer dimensions (imperial as supplied) ----------------------
-RING_OD = 3.518 * MM_PER_IN  # 89.3572
-RING_ID = 1.93 * MM_PER_IN  # 49.0220
-RING_THICKNESS = 0.525 * MM_PER_IN  # 13.3350
-CABLE_DIA = 0.125 * MM_PER_IN  # 3.1750
-GLAND_DIA = 0.34 * MM_PER_IN  # 8.6360
-GLAND_PROTRUSION = 0.07 * MM_PER_IN  # 1.7780 -- reach beyond the OD tangent
-
-CABLE_PROTRUSION = 12.0  # mm of cable beyond the gland face
+# --- Manufacturer dimensions ---------------------------------------------
+# Supplied in imperial; ../spec/led_ring_light.md holds both the imperial
+# figure and the millimetre conversion, and the conversion is done there once
+# rather than here and again in the lid.
+RING_OD = specs.figure("led_ring_light", "ring_od")
+RING_ID = specs.figure("led_ring_light", "ring_id")
+RING_THICKNESS = specs.figure("led_ring_light", "ring_thickness")
+CABLE_DIA = specs.figure("led_ring_light", "cable_dia")
+GLAND_DIA = specs.figure("led_ring_light", "gland_dia")
+GLAND_PROTRUSION = specs.figure("led_ring_light", "gland_protrusion")
+CABLE_PROTRUSION = specs.figure("led_ring_light", "cable_protrusion")
 
 # Top face edge treatment: 0.095 in = 2.413 mm, taken to the nearest whole
 # millimetre. Chamfer on the bore, blend on the outside.

@@ -6,26 +6,26 @@ Co-Author: Brendan Fennell
 
 Confirmed specifications of the LED ring light carried by the LED Sun Lid. Only record values that have been measured or taken from the manufacturer — not trial values used in scripts.
 
-Supplied in imperial; metric is the converted value used by every model (25.4 mm/in).
+Supplied in imperial. The **Value (mm)** column is the converted figure, and it is the one the models read — `specs.figure("led_ring_light", "ring_od")` — so the conversion is done once, here, rather than in each script. The Imperial column is kept as the provenance of each number, not as a second source to convert from.
 
 ## Ring
 
-| Property | Imperial | Metric (mm) | Notes |
-|----------|----------|-------------|-------|
-| Outer diameter | 3.518 in | 89.3572 | Drives the hub bore of the LED Sun Lid. |
-| Inner diameter | 1.93 in | 49.0220 | |
-| Thickness | 0.525 in | 13.3350 | Along the ring's primary (Z) axis. |
+| Key | Property | Imperial | Value (mm) | Notes |
+|-----|----------|----------|------------|-------|
+| `ring_od` | Outer diameter | 3.518 in | 89.3572 | Drives the hub bore of the LED Sun Lid. |
+| `ring_id` | Inner diameter | 1.93 in | 49.0220 | |
+| `ring_thickness` | Thickness | 0.525 in | 13.3350 | Along the ring's primary (Z) axis. |
 
 ## Cable Passthrough
 
 The gland and cable are coaxial and protrude parallel to **+Y**, centred at the ring's mid-thickness, taking the ring's primary axis as **Z**.
 
-| Property | Imperial | Metric (mm) | Notes |
-|----------|----------|-------------|-------|
-| Cable diameter | 0.125 in | 3.1750 | |
-| Gland diameter | 0.34 in | 8.6360 | Fits inside the 13.3350 ring thickness. |
-| Gland protrusion | 0.07 in | 1.7780 | Reach beyond the ring OD at the tangent point. |
-| Cable protrusion | — | 12.0 | Assumed, beyond the gland face. |
+| Key | Property | Imperial | Value (mm) | Notes |
+|-----|----------|----------|------------|-------|
+| `cable_dia` | Cable diameter | 0.125 in | 3.1750 | |
+| `gland_dia` | Gland diameter | 0.34 in | 8.6360 | Fits inside the 13.3350 ring thickness. |
+| `gland_protrusion` | Gland protrusion | 0.07 in | 1.7780 | Reach beyond the ring OD at the tangent point. |
+| `cable_protrusion` | Cable protrusion | — | 12.0 | Assumed, beyond the gland face. Not a manufacturer figure. |
 
 Resulting envelope, measured from the ring axis along +Y:
 

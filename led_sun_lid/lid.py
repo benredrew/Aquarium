@@ -15,6 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
+import specs
 from cadquery.selectors import Selector
 from engrave import engrave_radial_text
 from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeVertex
@@ -30,14 +31,16 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-# --- Interface dimensions (measured) -------------------------------------
-VESSEL_TOP_ID = 167.0  # see ../DIMENSIONS.md
-LED_RING_OD_IN = 3.518
-LED_RING_OD = LED_RING_OD_IN * 25.4  # 89.3572 mm
-RING_LIGHT_THICKNESS = 0.525 * 25.4  # 13.3350 mm
-GLAND_DIA = 0.34 * 25.4  # 8.6360 mm
-GLAND_PROTRUSION = 0.07 * 25.4  # 1.7780 mm past the ring OD
-CABLE_DIA = 0.125 * 25.4  # 3.1750 mm
+# --- Interface dimensions ------------------------------------------------
+# Everything the lid has to fit around, read from the documents in ../spec/
+# rather than restated here. The ring light's figures are supplied in imperial
+# and converted once, in its own document.
+VESSEL_TOP_ID = specs.figure("vessel", "top_opening_id")
+LED_RING_OD = specs.figure("led_ring_light", "ring_od")
+RING_LIGHT_THICKNESS = specs.figure("led_ring_light", "ring_thickness")
+GLAND_DIA = specs.figure("led_ring_light", "gland_dia")
+GLAND_PROTRUSION = specs.figure("led_ring_light", "gland_protrusion")
+CABLE_DIA = specs.figure("led_ring_light", "cable_dia")
 
 # --- Design parameters ---------------------------------------------------
 WALL = 6.0  # rim wall, hub wall and spoke width
@@ -59,7 +62,7 @@ SPOKE_COUNT = 6
 LIP_WIDTH = 2.0  # radial reach of the retaining lip
 LIP_HEIGHT = 2.0  # vertical thickness of the retaining lip
 HUB_BORE = 89.5  # bore that hugs the ring light -- drives the fit
-PASSTHROUGH_CLEARANCE = 0.5  # radial gap around the gland and cable
+PASSTHROUGH_CLEARANCE = specs.figure("fits", "passthrough_radial")
 PASSTHROUGH_BLEND = 0.5  # blend on the exterior edges the passthrough opens up
 # Direction the cable leaves the hub, in degrees about Z. The cutters are built
 # along +Y and rotated to suit, so 90 is the identity.
@@ -98,7 +101,7 @@ Y_AXIS = cq.Vector(0, 1, 0)
 #
 # Clearance applies to the walls only. The z-normal faces are left tight, so the
 # lip beds on the rebate floor and its top finishes flush with the lid face.
-SCREEN_CLEARANCE = 0.2
+SCREEN_CLEARANCE = specs.figure("fits", "free_wall_radial")
 SCREEN_LIP_WIDTH = 2.0  # reach of the lip past the screen wall, all the way round
 SCREEN_LIP_DEPTH = 2.0  # rebate depth, and so the lip thickness
 # Break on the lower edge of the rebate, where the floor meets the wall of the
