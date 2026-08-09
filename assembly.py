@@ -48,11 +48,12 @@ bowl_mod = load_part("test_fits/bowl.py", "bowl")
 screen_mod = load_part("lid_screen/screen.py", "screen")
 lid_variant = screen_mod.lid_variant  # already built, with its ring light
 
-# The vessel stands on the cradle floor, so its bottom face sits at FLOOR.
-vessel_base = base_mod.base.translate((0, 0, bowl_mod.FLOOR))
+# The cradle has no floor, so the vessel drops until its corner radius meets the
+# seat -- which puts its bottom face on z=0, the same plane the cradle sits on.
+vessel_base = base_mod.base
 
 # Lid, screen and light ride at the vessel mouth, TANK_HEIGHT above that face.
-LID_Z = bowl_mod.FLOOR + base_mod.TANK_HEIGHT
+LID_Z = base_mod.TANK_HEIGHT
 
 
 def at_mouth(part):

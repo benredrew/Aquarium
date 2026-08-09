@@ -19,7 +19,7 @@ Record of parts actually printed and tested against the vessel. Only confirmed p
 
 | Date | Revision | Rim OD (mm) | Hub Bore (mm) | Notes | Feedback |
 |------|----------|-------------|----------------|-------|----------|
-| 2026-08-01 | 10.5mm-thickness | 167.0 | 89.5 | First full prototype | Fit absolutely perfectly (reported 2026-08-02) — both diameters now recorded as standard slip fits, see `DIMENSIONS.md` and `LED_RING_LIGHT.md` |
+| 2026-08-01 | 10.5mm-thickness | 167.0 | 89.5 | First full prototype | Fit absolutely perfectly (reported 2026-08-02) — both diameters now recorded as standard slip fits, see `spec/vessel.md` and `spec/led_ring_light.md` |
 
 ## Vessel Base Cradle (`test_fits/bowl.py`)
 
@@ -27,12 +27,16 @@ Cradle that the vessel base sits in — the inverse of `test_fits/base.py`. Floo
 
 | Date | Time (approx) | Variant | Cavity OD (mm) | Corner R (mm) | Wall (mm) | Height (mm) | Notes | Feedback |
 |------|----------------|---------|-----------------|----------------|-----------|--------------|-------|----------|
-| 2026-08-07 | 18:15 | `ring_clipped`, one body | 181.0 | 5.5 | 3.6 | 12 | Full 188.2mm ring clipped to the 180mm bed, leaving four flats. Cradles a **trial** vessel base of OD 180 / corner R 5 with 0.5mm radial clearance — those base figures are unconfirmed guesses, not measurements. 21.6cm³. | |
+| 2026-08-07 | 18:15 | `ring_clipped`, one body | 181.0 | 5.5 | 3.6 | 12 | Full 188.2mm ring clipped to the 180mm bed, leaving four flats. Cradles a **trial** vessel base of OD 180 / corner R 5 with 0.5mm radial clearance — those base figures were unconfirmed guesses at the time. 21.6cm³. | |
+| 2026-08-08 | 08:49 | `ring_clipped`, one body, floorless | 178.4 | 5.2 | 3.6 | 12 | The regressed design: 2mm floor and the constant-stiffness lobed opening both removed for print speed, vessel taken to 178 OD with the 0.2mm radial free fit. 23.8cm³, 180×180×12. At this diameter the flats keep 0.8mm of wall, so no wall sectors are dropped at all. | **Fits perfectly** (reported 2026-08-08). This is what confirmed the vessel base OD of 178 and corner radius of 5 — both moved into `spec/vessel.md` as confirmed on the strength of it. |
 
-**Watch on this print:** at the four flats the upright wall is entirely gone across ±6°, and the ring is joined there only by the bottom lip web — 3.21mm tall, 27% of the 12mm section. Expect those webs to be the failure point if it splays. The four-segment alternative (`segments` in the same script) keeps full section everywhere and is the stronger option if this cracks.
+**Watch on the 2026-08-07 print:** at the four flats the upright wall was entirely gone across ±6°, and the ring was joined there only by the bottom lip web — 3.21mm tall, 27% of the 12mm section. Those webs were the expected failure point if it splayed. The four-segment alternative (`segments` in the same script) keeps full section everywhere and remains the stronger option. This does not apply to the 2026-08-08 print: at 178 the wall survives all the way round.
+
+**Watch on the 2026-08-08 print:** with the floor gone the seat's inner lip meets z=0 tangentially at r=84, so it tapers out to nothing rather than standing on 2mm of floor. Expect stair-stepping on the first few layers at the bore, and treat that lip as the fragile part when handling it.
 
 ## Notes
 
 - Exports at OD 169mm and OD 167mm (both 2mm wall, 10mm height, ~18:23–18:24 on 2026-08-01) were generated but **not printed** — omitted from this log by request.
-- Confirmed vessel measurements (not test-fit trial values) belong in `DIMENSIONS.md`.
+- Confirmed component dimensions belong in `spec/` — one document per off-the-shelf component. Allowances between parts belong in `spec/fits.md`, not in either.
+- A print fitting is what promotes a figure from a trial value in a script to a confirmed row in `spec/`. That is the main reason this log exists: it is the evidence behind those Confirmed dates.
 - Since `output/*.step` folders are gitignored and overwritten on every run, this log is the only durable record of what dimensions were actually exported and tested — update it whenever a print is confirmed.
