@@ -1,0 +1,539 @@
+<!--
+Author: Claude (Opus 5)
+Co-Author: Brendan Fennell
+
+The project's own map: what reads what, and where a number lives.
+
+Keep it current. Whenever a document gains or loses a keyed figure, a script
+starts or stops reading one, or a part joins the tree, update the diagram and
+the "where to change a number" table in the same sitting as the code change --
+a map that lags the repo is worse than none. Bump "Last checked" when you do.
+
+Published as an artifact; republish this file to the same URL rather than
+minting a new one, so the link Brendan holds stays good.
+-->
+<title>Aquarium — The Design Tree</title>
+<style>
+  :root {
+    --paper:      #E9EDF1;
+    --surface:    #F8FAFB;
+    --surface-2:  #DFE5EB;
+    --ink:        #16202B;
+    --ink-soft:   #56646F;
+    --ink-faint:  #8695A1;
+    --rule:       #C3CDD6;
+    --doc:        #2F6690;
+    --doc-tint:   rgba(47,102,144,0.09);
+    --hub:        #1B6470;
+    --hub-tint:   rgba(27,100,112,0.10);
+    --part:       #9C5226;
+    --part-tint:  rgba(156,82,38,0.09);
+    --font-mono:  ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "DejaVu Sans Mono", monospace;
+    --font-body:  "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #121920;
+      --surface:    #1A232B;
+      --surface-2:  #232E38;
+      --ink:        #E2E9EF;
+      --ink-soft:   #94A3AF;
+      --ink-faint:  #6C7C88;
+      --rule:       #31404C;
+      --doc:        #7FB4DD;
+      --doc-tint:   rgba(127,180,221,0.13);
+      --hub:        #63B4C2;
+      --hub-tint:   rgba(99,180,194,0.13);
+      --part:       #DC9663;
+      --part-tint:  rgba(220,150,99,0.13);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:      #121920;
+    --surface:    #1A232B;
+    --surface-2:  #232E38;
+    --ink:        #E2E9EF;
+    --ink-soft:   #94A3AF;
+    --ink-faint:  #6C7C88;
+    --rule:       #31404C;
+    --doc:        #7FB4DD;
+    --doc-tint:   rgba(127,180,221,0.13);
+    --hub:        #63B4C2;
+    --hub-tint:   rgba(99,180,194,0.13);
+    --part:       #DC9663;
+    --part-tint:  rgba(220,150,99,0.13);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 0 clamp(16px, 4vw, 56px) 96px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; }
+  .prose { max-width: 68ch; }
+
+  header {
+    padding: clamp(40px, 7vw, 84px) 0 0;
+    border-top: 2px solid var(--ink);
+    margin-top: 0;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 20px;
+  }
+  h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(30px, 5.2vw, 46px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+    text-wrap: balance;
+    margin: 0 0 20px;
+  }
+  .standfirst {
+    font-size: clamp(17px, 2vw, 19px);
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 60ch;
+    text-wrap: pretty;
+  }
+  .kept {
+    font-size: 14px;
+    color: var(--ink-faint);
+    max-width: 62ch;
+    margin: 22px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 24px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+  section { margin-top: clamp(52px, 7vw, 80px); }
+
+  .rules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+    margin: 0;
+    padding: 0;
+  }
+  .rules > div { margin: 0; }
+  .rules dt {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--doc);
+    margin: 0 0 8px;
+    padding-top: 12px;
+    border-top: 2px solid var(--doc);
+  }
+  .rules dd { margin: 0; color: var(--ink-soft); font-size: 15px; }
+  .rules dd b { color: var(--ink); font-weight: 600; }
+
+  figure { margin: 0; }
+  .figscroll {
+    overflow-x: auto;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    padding: 20px;
+  }
+  .figscroll svg { display: block; min-width: 900px; width: 100%; height: auto; color: var(--ink); }
+  figcaption {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    max-width: 68ch;
+  }
+
+  .d-box-doc  { fill: var(--doc-tint);  stroke: var(--doc);  stroke-width: 1.5; }
+  .d-box-hub  { fill: var(--hub-tint);  stroke: var(--hub);  stroke-width: 1.5; }
+  .d-box-part { fill: var(--part-tint); stroke: var(--part); stroke-width: 1.5; }
+  .d-dash     { stroke-dasharray: 5 4; }
+  .d-title    { font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; fill: var(--ink); }
+  .d-sub      { font-family: var(--font-mono); font-size: 9px; fill: var(--ink-soft); }
+  .d-flow     { fill: none; stroke: currentColor; stroke-width: 1.4; opacity: 0.5; }
+  .d-flow-dash{ fill: none; stroke: currentColor; stroke-width: 1.4; opacity: 0.35; stroke-dasharray: 5 4; }
+  .d-arrowlab { font-family: var(--font-mono); font-size: 9.5px; fill: var(--ink-faint); }
+  .d-band     { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.14em; fill: var(--ink-faint); text-transform: uppercase; }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    margin-top: 18px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 9px; }
+  .swatch { width: 22px; height: 12px; border-width: 1.5px; border-style: solid; flex: none; }
+  .sw-doc  { background: var(--doc-tint);  border-color: var(--doc); }
+  .sw-hub  { background: var(--hub-tint);  border-color: var(--hub); }
+  .sw-part { background: var(--part-tint); border-color: var(--part); }
+  .sw-dash { background: transparent; border-color: var(--ink-faint); border-style: dashed; }
+
+  .tablescroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 14.5px; }
+  caption { text-align: left; color: var(--ink-soft); font-size: 14px; margin-bottom: 16px; max-width: 68ch; }
+  th, td { text-align: left; padding: 13px 18px 13px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 600;
+    border-bottom: 1px solid var(--ink-soft);
+    white-space: nowrap;
+  }
+  td code, .prose code, .rules code {
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+    background: var(--surface-2);
+    padding: 2px 6px;
+    color: var(--ink);
+  }
+  td:first-child { color: var(--ink); font-weight: 600; }
+  td:last-child { color: var(--ink-soft); }
+
+  .roster {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .card { background: var(--surface); padding: 20px 22px; }
+  .card h3 {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    margin: 0 0 14px;
+    color: var(--ink-faint);
+  }
+  .card ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 11px; }
+  .card li { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .card .fname {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--ink);
+    display: block;
+  }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 1px 6px;
+    border: 1px solid currentColor;
+    margin-left: 7px;
+    white-space: nowrap;
+  }
+  .tag-step { color: var(--part); }
+  .tag-none { color: var(--ink-faint); }
+
+  .loose { border-left: 2px solid var(--part); padding-left: 22px; }
+  .loose li { margin-bottom: 14px; color: var(--ink-soft); }
+  .loose li:last-child { margin-bottom: 0; }
+  .loose b { color: var(--ink); font-weight: 600; }
+
+  .prose p { max-width: 68ch; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Aquarium · CadQuery · last checked 2026-08-08, 23:20</p>
+    <h1>The design tree</h1>
+    <p class="standfirst">Every number lives in exactly one place and flows downhill. Here is the whole of it — which file owns what, and what moves when you change it.</p>
+    <p class="kept"><code>DESIGN_TREE.html</code> in the repo. It is updated alongside the code, not after it: if a document gains a figure or a script starts reading one, this page changes in the same sitting.</p>
+  </header>
+
+  <section>
+    <h2>The three rules that explain everything else</h2>
+    <dl class="rules">
+      <div>
+        <dt>1 · Documents own figures</dt>
+        <dd><b>spec/</b> holds one document per off-the-shelf component — what a thing <i>is</i>. Allowances between parts live apart, in <code>fits.md</code>, because a gap is a property of the joint, not of the glass.</dd>
+      </div>
+      <div>
+        <dt>2 · Code reads documents</dt>
+        <dd><b>specs.py</b> parses any markdown table whose first column is <code>Key</code>. Scripts call <code>specs.figure(doc, key)</code> instead of holding their own copy of a number.</dd>
+      </div>
+      <div>
+        <dt>3 · Parts derive, never restate</dt>
+        <dd>Each model is built from the one above it. <b>bowl.py</b> takes its cavity from <b>base.py</b>, so the cradle cannot drift from the vessel it has to fit.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section>
+    <h2>What reads what</h2>
+    <figure>
+      <div class="figscroll">
+        <svg viewBox="0 0 1160 480" role="img" aria-label="Dependency tree: all three specification documents in spec slash are parsed by specs.py, which feeds the vessel chain base.py to bowl.py and the lid chain lid.py plus ring_light.py to lid_two_spoke.py to screen.py, vessel.py modelling the tank itself, and assembly.py gathering base, bowl and screen for preview only.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="7" orient="auto-start-reverse">
+              <polygon points="0,0 10,4 0,8" fill="currentColor" opacity="0.75" />
+            </marker>
+          </defs>
+
+          <text x="105" y="52" class="d-band" text-anchor="middle">Specifications</text>
+          <text x="318" y="52" class="d-band" text-anchor="middle">Reader</text>
+          <text x="795" y="52" class="d-band" text-anchor="middle">Models</text>
+
+          <line x1="20" y1="62" x2="1140" y2="62" stroke="currentColor" opacity="0.16" />
+
+          <!-- Documents -->
+          <rect class="d-box-doc" x="20" y="90" width="170" height="64" />
+          <text class="d-title" x="32" y="112">spec/vessel.md</text>
+          <text class="d-sub"   x="32" y="128">top_opening_id</text>
+          <text class="d-sub"   x="32" y="142">base_od · base_corner_radius</text>
+
+          <rect class="d-box-doc" x="20" y="170" width="170" height="64" />
+          <text class="d-title" x="32" y="192">spec/fits.md</text>
+          <text class="d-sub"   x="32" y="208">free_wall_radial</text>
+          <text class="d-sub"   x="32" y="222">+ 3 more allowances</text>
+
+          <rect class="d-box-doc" x="20" y="250" width="170" height="64" />
+          <text class="d-title" x="32" y="272">spec/led_ring_light.md</text>
+          <text class="d-sub"   x="32" y="288">ring_od · ring_thickness</text>
+          <text class="d-sub"   x="32" y="302">+ 5 more, imperial converted</text>
+
+          <!-- Reader -->
+          <rect class="d-box-hub" x="250" y="150" width="136" height="76" />
+          <text class="d-title" x="262" y="172">specs.py</text>
+          <text class="d-sub"   x="262" y="188">parses tables keyed</text>
+          <text class="d-sub"   x="262" y="201">in the first column</text>
+          <text class="d-sub"   x="262" y="216">figure(doc, key)</text>
+
+          <!-- Vessel chain -->
+          <rect class="d-box-part" x="470" y="56" width="156" height="54" />
+          <text class="d-title" x="482" y="79">test_fits/base.py</text>
+          <text class="d-sub"   x="482" y="95">the vessel, modelled</text>
+
+          <rect class="d-box-part" x="716" y="56" width="156" height="54" />
+          <text class="d-title" x="728" y="79">test_fits/bowl.py</text>
+          <text class="d-sub"   x="728" y="95">the cradle</text>
+
+          <rect class="d-box-part" x="716" y="145" width="156" height="54" />
+          <text class="d-title" x="728" y="168">cradle_segment.py</text>
+          <text class="d-sub"   x="728" y="184">45° arc, curvature test</text>
+
+          <path class="d-flow" d="M794,110 L794,145" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="802" y="132">one arc of it</text>
+
+          <!-- Lid chain -->
+          <rect class="d-box-part" x="470" y="210" width="156" height="54" />
+          <text class="d-title" x="482" y="233">led_sun_lid/lid.py</text>
+          <text class="d-sub"   x="482" y="249">master lid + the joint</text>
+
+          <rect class="d-box-part d-dash" x="470" y="300" width="156" height="54" />
+          <text class="d-title" x="482" y="323">ring_light.py</text>
+          <text class="d-sub"   x="482" y="339">bought part, mocked</text>
+          <text class="d-arrowlab" x="448" y="300" text-anchor="middle">reads</text>
+
+          <rect class="d-box-part" x="716" y="255" width="156" height="54" />
+          <text class="d-title" x="728" y="278">lid_two_spoke.py</text>
+          <text class="d-sub"   x="728" y="294">2-spoke variant</text>
+
+          <rect class="d-box-part" x="962" y="255" width="156" height="54" />
+          <text class="d-title" x="974" y="278">lid_screen/screen.py</text>
+          <text class="d-sub"   x="974" y="294">fills the open water</text>
+
+          <!-- Assembly -->
+          <rect class="d-box-part" x="470" y="390" width="156" height="54" />
+          <text class="d-title" x="482" y="413">vessel/vessel.py</text>
+          <text class="d-sub"   x="482" y="429">the tank itself, modelled</text>
+          <path class="d-flow" d="M386,224 C436,224 436,417 470,417" marker-end="url(#ah)" />
+
+          <rect class="d-box-part d-dash" x="962" y="390" width="170" height="62" />
+          <text class="d-title" x="974" y="412">assembly.py</text>
+          <text class="d-sub"   x="974" y="428">base + bowl + screen</text>
+          <text class="d-sub"   x="974" y="442">preview only</text>
+
+          <!-- Flows: documents into the reader -->
+          <path class="d-flow" d="M190,122 C220,122 220,168 250,168" marker-end="url(#ah)" />
+          <path class="d-flow" d="M190,202 C220,202 220,188 250,188" marker-end="url(#ah)" />
+          <path class="d-flow" d="M190,282 C220,282 220,210 250,210" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="220" y="80" text-anchor="middle">parsed</text>
+
+          <!-- Reader into the models -->
+          <path class="d-flow" d="M386,168 C428,168 428,83 470,83" marker-end="url(#ah)" />
+          <path class="d-flow" d="M386,188 C560,188 630,140 716,96" marker-end="url(#ah)" />
+          <path class="d-flow" d="M386,205 C428,205 428,232 470,232" marker-end="url(#ah)" />
+          <path class="d-flow" d="M386,220 C430,220 430,327 470,327" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="566" y="150" text-anchor="middle">reads</text>
+
+          <!-- Model to model -->
+          <path class="d-flow" d="M626,83 L716,83" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="671" y="74" text-anchor="middle">OD · corner R</text>
+
+          <path class="d-flow" d="M626,237 C672,237 672,270 716,270" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="671" y="222" text-anchor="middle">lid profile</text>
+
+          <path class="d-flow" d="M626,327 C672,327 672,296 716,296" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="671" y="348" text-anchor="middle">envelope</text>
+
+          <path class="d-flow" d="M872,282 L962,282" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="917" y="272" text-anchor="middle">void to fill</text>
+
+          <!-- Into the preview -->
+          <path class="d-flow-dash" d="M1040,309 L1040,390" marker-end="url(#ah)" />
+          <path class="d-flow-dash" d="M872,96 C1000,96 1146,150 1146,340 C1146,372 1130,390 1112,390" marker-end="url(#ah)" />
+          <text class="d-arrowlab" x="1052" y="352">preview</text>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><i class="swatch sw-doc"></i>specification document</span>
+        <span><i class="swatch sw-hub"></i>the reader</span>
+        <span><i class="swatch sw-part"></i>model, exports STEP</span>
+        <span><i class="swatch sw-dash"></i>not printed</span>
+      </div>
+      <figcaption>Everything flows left to right. Nothing flows back: no model writes a figure into a document, and no document knows a part exists. <code>assembly.py</code> is the one node that only consumes — it renders the preview and exports nothing.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Where to change a number</h2>
+    <div class="tablescroll">
+      <table>
+        <caption>The first column is what you want to move; the second is the only file you should touch to move it.</caption>
+        <thead>
+          <tr><th>To change</th><th>Edit</th><th>What follows on its own</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Vessel base diameter</td>
+            <td><code>spec/vessel.md</code> — <code>base</code> row, OD cell</td>
+            <td>The vessel model, the cradle's bore, seat and outer radius, and the engraved labels on the print</td>
+          </tr>
+          <tr>
+            <td>Vessel shape, anywhere above the base</td>
+            <td><code>vessel/vessel.py</code> — the <code>SECTIONS</code> table</td>
+            <td>Only the vessel model. Nothing derives from it yet — it exists to design the next part against</td>
+          </tr>
+          <tr>
+            <td>Vessel base corner radius</td>
+            <td><code>spec/vessel.md</code> — <em>Working figures</em>, <code>base</code> row</td>
+            <td>The vessel's fillet and the cradle's whole seat profile. Still unconfirmed — it sits in the working table, not the measured one</td>
+          </tr>
+          <tr>
+            <td>Vessel mouth ID</td>
+            <td><code>spec/vessel.md</code> — <code>top_opening</code> row</td>
+            <td>The lid's rim OD, and so the two-spoke lid and the screen after it</td>
+          </tr>
+          <tr>
+            <td>Free-fit clearance</td>
+            <td><code>spec/fits.md</code> — <code>free_wall_radial</code></td>
+            <td>Both the cradle bore <em>and</em> the lid/screen joint — this one figure serves two parts</td>
+          </tr>
+          <tr>
+            <td>Cable passthrough gap</td>
+            <td><code>spec/fits.md</code> — <code>passthrough_radial</code></td>
+            <td>The lid's gland and cable cutout</td>
+          </tr>
+          <tr>
+            <td>Lid/screen joint sizes</td>
+            <td><code>led_sun_lid/lid.py</code> — the <code>SCREEN_*</code> constants</td>
+            <td>Both halves: the lid cuts the rebate, the screen fills it, so they read one set</td>
+          </tr>
+          <tr>
+            <td>Cradle wall or height</td>
+            <td><code>test_fits/bowl.py</code></td>
+            <td>The cradle alone — nothing else derives from it</td>
+          </tr>
+          <tr>
+            <td>Ring light dimensions</td>
+            <td><code>spec/led_ring_light.md</code> — the <code>Value (mm)</code> column</td>
+            <td>The mock model, the lid's hub bore and its cable cutout. Convert imperial once, in the document</td>
+          </tr>
+          <tr>
+            <td>Hub bore over the ring</td>
+            <td><code>led_sun_lid/lid.py</code> — <code>HUB_BORE</code></td>
+            <td>The lid alone. This is a design choice, not a component figure — 89.5 is a round number that happened to fit</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Every file, by the job it does</h2>
+    <div class="roster">
+      <div class="card">
+        <h3>Specifications</h3>
+        <ul>
+          <li><span class="fname">spec/vessel.md</span>The glass, as confirmed. Three keyed figures.</li>
+          <li><span class="fname">spec/fits.md</span>What to leave between parts. All figures radial.</li>
+          <li><span class="fname">spec/led_ring_light.md</span>The bought light. Seven keyed figures; imperial converted once, here.</li>
+          <li><span class="fname">PRINT_LOG.md</span>What was actually printed and whether it fitted — the evidence behind every Confirmed date.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Shared code</h3>
+        <ul>
+          <li><span class="fname">specs.py</span>Reads the documents.</li>
+          <li><span class="fname">engrave.py</span>Puts labels on parts.</li>
+          <li><span class="fname">print_volume.py</span>The 180mm bed, plus the fit check that refuses to export an oversize part.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Printed parts</h3>
+        <ul>
+          <li><span class="fname">test_fits/bowl.py<span class="tag tag-step">step</span></span>The cradle. Floorless, fits.</li>
+          <li><span class="fname">test_fits/cradle_segment.py<span class="tag tag-step">step</span></span>A 45° arc of that cradle, cut from where the build plate never reaches, for comparing the seat's curve against the glass.</li>
+          <li><span class="fname">led_sun_lid/lid.py<span class="tag tag-step">step</span></span>The sun dial lid, master version.</li>
+          <li><span class="fname">led_sun_lid/lid_two_spoke.py<span class="tag tag-step">step</span></span>The two-spoke variant.</li>
+          <li><span class="fname">lid_screen/screen.py<span class="tag tag-step">step</span></span>The screen. Exports three files — both bodies together, then each alone, so they can take different print settings.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>References &amp; previews</h3>
+        <ul>
+          <li><span class="fname">test_fits/base.py<span class="tag tag-step">step</span></span>The vessel itself, modelled to check things against.</li>
+          <li><span class="fname">led_ring_light/ring_light.py<span class="tag tag-step">step</span></span>A mock of the bought light, for clearances. Not printed.</li>
+          <li><span class="fname">vessel/vessel.py<span class="tag tag-step">step</span></span>The tank&rsquo;s exterior, measured off a photograph: five diameters, blended, on an R8 base roll. Each zone carries its own diameter engraved on it.</li>
+          <li><span class="fname">assembly.py<span class="tag tag-none">no export</span></span>The whole stack in the viewer.</li>
+          <li><span class="fname">test_fits/tube.py · led_ring.py<span class="tag tag-step">step</span></span>Standalone trial rings. Nothing derives from them.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Loose ends, so they don't surprise you</h2>
+    <ul class="loose">
+      <li><b>Every figure is now wired.</b> The ring light was the last one holding its dimensions in two places; as of 2026-08-08 both <code>ring_light.py</code> and <code>lid.py</code> read them from the document. Reading the document's <code>89.3572</code> rather than computing <code>3.518 × 25.4</code> shifted the parts by about a millionth of a cubic millimetre — solver noise, not a design change, and the print is unaffected.</li>
+      <li><b>The base corner radius is settled at 8mm</b> — by printing 45&deg; cradle sections and holding them against the glass until the curve matched. That is a visual match, not a caliper reading, but it is evidence about the object rather than about a photograph.</li>
+      <li><b>The vessel model is photo-derived and locked, not measured.</b> One image, scaled by the one confirmed diameter. Good to a percent or two on the diameters; the lower waist is the weakest part, since the substrate line crosses it in the picture and I overrode the outline there to match the upper waist. It is deliberately <em>not</em> written into <code>spec/vessel.md</code> — that document holds confirmed figures, and a second copy of these would drift.</li>
+      <li><b>The tank's height has never been measured.</b> <code>base.py</code> assumes it is as tall as it is wide, purely so the preview can place the lid somewhere plausible. Every part is to size; only the vertical gap between cradle and lid is a guess.</li>
+      <li><b>The cradle's seat now tapers to nothing.</b> Removing the floor left the inner lip meeting the bed tangentially at r=84. It fits, but treat that lip as the fragile edge when handling the print.</li>
+      <li><b>The constant-stiffness work is gone from the working tree,</b> not lost — the moment integration and the solved floor profile are in the git history, and the method is written down.</li>
+    </ul>
+  </section>
+
+</div>
