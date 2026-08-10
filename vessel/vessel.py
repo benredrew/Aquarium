@@ -45,6 +45,15 @@ fixes 6.51 px/mm, and every other dimension here is that ratio on the outline.
 All of them are derived; none is measured; none belongs in the spec document
 until a caliper or a printed part says so.
 
+## Junctions: arcs where they reach, a cone where they do not
+
+Four of the five sections are joined by a pair of tangent arcs, which is the
+shape a blend wants to be. The rim flare is the exception -- 7.85mm of radius in
+6.2mm of height -- and a tangent-arc pair tops out at dr/dz = 1, so asking it for
+1.266 folded the profile back on itself and left a 0.17mm re-entrant groove under
+the rim. That junction is now a straight cone with a fillet at each end, which
+holds any dr/dz and stays tangent to both walls. Nothing else moved.
+
 ## What is still open
 
 The raw phone photo (IMG_6356) reads the body about 4.5% wider than this. The
@@ -86,19 +95,50 @@ WAIST_DIA = 165.7
 BODY_DIA = 178.8
 BULGE_DIA = 178.0          # the vessel OD, the one anchored figure
 WAIST_WALL = 15.4          # straight wall of each waist -- what a band wraps
+                           # (scaled with the rest of z below; see Z_SCALE)
 
 # The bottom has no flat wall. The R8 roll rises to its crest at BULGE_DIA with
 # a vertical tangent, and the neck out of it leaves on that same tangent -- the
 # two radii meet, and the crest is a point, not a band. Giving it a straight
 # wall put a corner on the bulge that the glass does not have.
 BULGE_CREST = 8.0          # = CORNER_R: where the roll goes vertical
-NECK = 12.4                # crest to the waist wall, all curve
 
-BLEND_WAIST_BODY = 10.2    # both waist/body junctions -- same feature twice
-BLEND_WAIST_RIM = 6.2
+# --- The height, measured ---------------------------------------------------
+# The outline read 156.4 to the rim. A rule reads 179.39 (spec/vessel.md,
+# `overall_height`), so the photograph was 14.7% short in z -- the brim runs off
+# the top of the frame and the correction made for that was not enough.
+#
+# The diameters are not touched: they hang off the base OD, which a printed
+# cradle confirmed independently, and nothing about the height says they are
+# wrong. Only z is scaled, and only *above the crest of the base roll* -- the
+# roll is a circle of the confirmed R8, and scaling z alone through it would
+# quietly turn it into an ellipse. So the scale is taken over the part of the
+# stack the photograph actually measured, which makes it 1.155 rather than the
+# 1.147 the two totals imply.
+#
+# What survives this is proportion, not measurement: every junction below the
+# rim is still the photograph's, now expressed as a share of a real total.
+MEASURED_HEIGHT = specs.figure("vessel", "overall_height")
+PHOTO_RIM_TOP = 156.4      # what the outline gave, kept as the record
+Z_SCALE = (MEASURED_HEIGHT - BULGE_CREST) / (PHOTO_RIM_TOP - BULGE_CREST)
 
-RIM_TOP = 156.4
-UPPER_WAIST_TOP = 144.4    # measured, and taken as truth
+NECK = 12.4 * Z_SCALE      # crest to the waist wall, all curve
+
+BLEND_WAIST_BODY = 10.2 * Z_SCALE   # both waist/body junctions -- same feature twice
+BLEND_WAIST_RIM = 6.2 * Z_SCALE
+
+# The rim flare steps 7.85mm of radius in 6.2mm of height. A pair of tangent
+# arcs cannot do that (see _blend), so this junction alone is a cone with a
+# fillet at each end. The radius is a modelling choice, not a reading: the
+# outline cannot resolve a 1.5mm fillet at this scale, and the alternative --
+# sharp corners -- is the one thing the glass certainly does not have.
+RIM_FILLET = 1.5
+
+WAIST_WALL *= Z_SCALE
+
+RIM_TOP = MEASURED_HEIGHT
+# The outline's 144.4, held at the same share of the stack above the crest.
+UPPER_WAIST_TOP = BULGE_CREST + (144.4 - BULGE_CREST) * Z_SCALE
 
 # Built downward from the rim, then upward from the crest; the body absorbs
 # whatever is left between them, which is the only section with slack in it.
@@ -128,7 +168,17 @@ HEIGHT = SECTIONS[-1][3]
 FLAT_DIA = SECTIONS[0][1] - 2 * CORNER_R      # what it actually stands on
 
 
-def _blend(r1, r2, zj, T):
+# A tangent-arc pair spans dr/dz = tan(alpha/2) and is limited to alpha <= 180
+# degrees of total turn, so it cannot reach past dr/dz = 1: ask for more and each
+# arc swings past horizontal and the profile folds back on itself. That fold is
+# real geometry, not a display artifact -- a horizontal slice through it returns
+# two separate solids -- and it is small enough (0.17mm tall, 1.5mm deep at the
+# rim) to survive every render unnoticed. It was caught by the profile gauge, by
+# measuring rather than looking.
+FOLD_LIMIT = 1.0
+
+
+def _arc_blend(r1, r2, zj, T):
     """Two tangent arcs joining vertical walls r1 (below) and r2 (above).
 
     Each arc turns through alpha, meeting at the inflection halfway. Solving
@@ -136,13 +186,10 @@ def _blend(r1, r2, zj, T):
 
         alpha = 2*atan(d / T),      radius = T / (2*sin(alpha))
 
-    so the blend spans exactly T in z and lands tangent to both walls. Returned
-    as (through, end) pairs for threePointArc, which has no sign convention to
-    get wrong -- radiusArc does, and it bows the wrong way about half the time.
+    so the blend spans exactly T in z and lands tangent to both walls. Only
+    valid while |d| / T <= FOLD_LIMIT; past that use _cone_blend.
     """
     d = r1 - r2
-    if abs(d) < 1e-9:
-        return []
     alpha = 2 * math.atan(abs(d) / T)
     rad = T / (2 * math.sin(alpha))
     sgn = 1.0 if d > 0 else -1.0
@@ -151,7 +198,80 @@ def _blend(r1, r2, zj, T):
     mid1 = (c1[0] + sgn * rad * math.cos(alpha / 2), c1[1] + rad * math.sin(alpha / 2))
     c2 = (r2 + sgn * rad, zj + T / 2)
     mid2 = (c2[0] - sgn * rad * math.cos(alpha / 2), c2[1] - rad * math.sin(alpha / 2))
-    return [(mid1, (rm, zj)), (mid2, (r2, zj + T / 2))]
+    return [("arc", mid1, (rm, zj)), ("arc", mid2, (r2, zj + T / 2))]
+
+
+def _cone_blend(r1, r2, zj, T, R):
+    """A straight cone between two R fillets -- the steep-junction blend.
+
+    A cone can hold any dr/dz at all, so the fold has nowhere to come from; the
+    fillets are what keep the two ends tangent to the walls, since a bare cone
+    would put a hard corner top and bottom. With the cone at phi from vertical
+    the three pieces have to add up to the junction:
+
+        2R*sin(phi)      + L*cos(phi) = T
+        2R*(1 - cos(phi)) + L*sin(phi) = |d|
+
+    Eliminating L leaves one equation in phi, rising monotonically from -|d| at
+    phi = 0 to unbounded as the cone approaches horizontal, so it is bisected
+    rather than solved: the closed form is a quartic and this is a shape, not a
+    physical constant.
+    """
+    a = abs(r1 - r2)
+    s = 1.0 if r2 > r1 else -1.0     # +1 flares outward going up
+    z0, z1 = zj - T / 2, zj + T / 2
+
+    def excess(phi):
+        """Radial step this phi delivers, less the one required."""
+        return 2 * R * (1 - math.cos(phi)) + (T - 2 * R * math.sin(phi)) * math.tan(phi) - a
+
+    lo, hi = 1e-9, math.radians(89.9)
+    if excess(hi) < 0:
+        raise ValueError(
+            f"a cone at 89.9 degrees still cannot step {a:.3f}mm in {T:.3f}mm "
+            f"with R{R:g} fillets; the fillets are eating the whole transition."
+        )
+    for _ in range(80):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if excess(mid) < 0 else (lo, mid)
+    phi = (lo + hi) / 2
+
+    L = (T - 2 * R * math.sin(phi)) / math.cos(phi)
+    if L < 0:
+        raise ValueError(
+            f"R{R:g} fillets overrun the {T:g}mm transition; the cone comes out "
+            f"{L:.3f}mm long. Use a smaller RIM_FILLET."
+        )
+
+    # Each fillet turns through phi. Points at turn t: the lower one leaves the
+    # r1 wall going up, the upper one arrives at the r2 wall, and they are the
+    # same arc rotated 180 degrees about the junction.
+    def lower(t):
+        return (r1 + s * R * (1 - math.cos(t)), z0 + R * math.sin(t))
+
+    def upper(t):
+        return (r2 - s * R * (1 - math.cos(t)), z1 - R * math.sin(t))
+
+    return [
+        ("arc", lower(phi / 2), lower(phi)),
+        ("line", None, upper(phi)),          # the cone
+        ("arc", upper(phi / 2), upper(0.0)),
+    ]
+
+
+def _blend(r1, r2, zj, T):
+    """The junction between vertical walls r1 (below) and r2 (above).
+
+    Arcs where they reach, a cone where they do not. Returned as tagged
+    (through, end) steps for threePointArc, which has no sign convention to get
+    wrong -- radiusArc does, and it bows the wrong way about half the time.
+    """
+    d = r1 - r2
+    if abs(d) < 1e-9:
+        return []
+    if abs(d) / T <= FOLD_LIMIT:
+        return _arc_blend(r1, r2, zj, T)
+    return _cone_blend(r1, r2, zj, T, RIM_FILLET)
 
 
 def build_vessel():
@@ -172,8 +292,12 @@ def build_vessel():
             # "BRepAdaptor_Curve::No geometry".
             if abs((z1 - T / 2) - _z0) > 1e-9:
                 wire = wire.lineTo(r, z1 - T / 2)
-            for through, end in _blend(r, SECTIONS[i + 1][1] / 2, z1, T):
-                wire = wire.threePointArc(through, end)
+            for kind, through, end in _blend(r, SECTIONS[i + 1][1] / 2, z1, T):
+                wire = (
+                    wire.threePointArc(through, end)
+                    if kind == "arc"
+                    else wire.lineTo(*end)
+                )
         else:
             wire = wire.lineTo(r, z1)
     return wire.lineTo(0, HEIGHT).close().revolve(360, (0, 0, 0), (0, 1, 0))

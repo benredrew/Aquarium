@@ -26,8 +26,8 @@ ALPHA = 0.2  # 80% transparent
 volume = cq.Workplane("XY").box(BED_X, BED_Y, BED_Z, centered=(True, True, False))
 
 
-def extents(shape):
-    """(dx, dy, dz) of `shape`, measured off the exact geometry.
+def bounds(shape):
+    """(xmin, ymin, zmin, xmax, ymax, zmax) of `shape`, from the exact geometry.
 
     Uses BRepBndLib.AddOptimal rather than Shape.BoundingBox(). The plain
     bounding box reuses whatever triangulation the shape already carries, so
@@ -37,14 +37,27 @@ def extents(shape):
     the geometry and gives the same tight answer either way.
 
     Measuring from vertices instead is also wrong here: on a curved part the
-    widest point of an arc is not a vertex, so vertices under-report.
+    widest point of an arc is not a vertex, so vertices under-report. That is
+    not a small effect -- reading the vessel's blends off their vertices put
+    one junction radius 1.7mm out, which is the size of the errors the profile
+    gauge exists to hunt.
+
+    Sides as well as sizes, because a face measured against one plane -- how far
+    a profile stands off the axis, how close a part comes to the bed edge --
+    needs the side, and rederiving it from a size and an assumed centre is how
+    a sign error gets in.
     """
     box = Bnd_Box()
     # useTriangulation=False is the whole point -- left at its default of True
     # this still measures the mesh when one is present, and inflates the answer
     # by the triangulation deflection plus the face tolerance.
     BRepBndLib.AddOptimal_s(shape.val().wrapped, box, False, False)
-    xmin, ymin, zmin, xmax, ymax, zmax = box.Get()
+    return box.Get()
+
+
+def extents(shape):
+    """(dx, dy, dz) of `shape`, measured off the exact geometry."""
+    xmin, ymin, zmin, xmax, ymax, zmax = bounds(shape)
     return xmax - xmin, ymax - ymin, zmax - zmin
 
 

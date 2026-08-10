@@ -26,6 +26,7 @@ The gland and cable are coaxial and protrude parallel to **+Y**, centred at the 
 | `gland_dia` | Gland diameter | 0.34 in | 8.6360 | Fits inside the 13.3350 ring thickness. |
 | `gland_protrusion` | Gland protrusion | 0.07 in | 1.7780 | Reach beyond the ring OD at the tangent point. |
 | `cable_protrusion` | Cable protrusion | — | 12.0 | Assumed, beyond the gland face. Not a manufacturer figure. |
+| `cable_bend_od_od` | Min bend, outside to outside | 0.7 in | 17.7800 | The tightest U the cable will take, measured across the outside of both legs. Centreline radius is half of it less one cable diameter: **7.3025**. Any channel that turns the cable has to hold at least that. |
 
 Resulting envelope, measured from the ring axis along +Y:
 

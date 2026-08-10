@@ -30,10 +30,10 @@ CORNER_RADIUS = specs.figure("vessel", "base_corner_radius")
 # Not a vessel figure -- just enough height to hold the corner radius and give
 # something to grip while checking the fit, so it stays a literal.
 HEIGHT = 20.0
-# Working assumption for previews only: the tank is as tall as it is wide. Not a
-# measurement -- it is here so the lid and the cradle can be shown at plausible
-# heights relative to each other. See ../assembly.py.
-TANK_HEIGHT = OD
+# Measured 2026-08-09 and now a figure like any other. It was the tank's OD
+# until then -- a stand-in so assembly.py could place the lid somewhere
+# plausible -- and the guess was 1.4mm out, which is luck rather than method.
+TANK_HEIGHT = specs.figure("vessel", "overall_height")
 
 base = cq.Workplane("XY").circle(OD / 2).extrude(HEIGHT)
 base = base.faces("<Z").edges().fillet(CORNER_RADIUS)
