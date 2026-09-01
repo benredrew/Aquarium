@@ -15,6 +15,19 @@ Record of parts actually printed and tested against the vessel. Only confirmed p
 | 2026-08-01 | 16:33 | 180 | 2 | 10 | 176 | Re-export after relocating script into `test_fits/` folder structure; same dimensions as above | |
 | 2026-08-01 | 17:40 | 168 | 2 | 10 | 164 | OD reduced from 180 to 168 (via intermediate 170/166mm trials at 5mm height, not logged here since not printed at that height) | |
 
+## Vessel 2 — Tube Test Fits (`test_fits/tube.py`)
+
+Iterating the top opening ID for the second vessel, the same way vessel 1's mouth was dialled in before the LED Sun Lid prototype settled it exactly. See `spec/vessel_2.md`.
+
+| Date | Time (approx) | OD (mm) | Wall (mm) | Height (mm) | ID (mm) | Notes | Feedback |
+|------|----------------|---------|-----------|--------------|---------|-------|----------|
+| 2026-08-31 | 19:11 | 116 | 1 | 15 | 114 | First trial — caliper read 4.6in (116.84mm), rounded down. Not printed — superseded below before export. | |
+| 2026-08-31 | 19:15 | 116 | 2 | 15 (+2 lip) | 112 | Wall increased 1 → 2mm. Added a 4mm-wide (0.16in = 4.064mm, rounded down) stop lip at the bottom, OD 124mm, 2mm tall, so the tube seats depth-controlled against the rim instead of sliding through. Superseded below before printing. | |
+| 2026-08-31 | 19:17 | 116 | 2 | 10 (8 tube + 2 lip) | 112 | Overall height reduced 17 → 10mm; tube body shortened to 8mm, lip unchanged at 2mm. Superseded below before printing. | |
+| 2026-08-31 | 19:18 | 116 | 2 | 10 (9 tube + 1 lip) | 112 | Lip thickness reduced 2 → 1mm; tube body grew to 9mm to hold overall height at 10mm. Printed. | Loose. |
+| 2026-08-31 | 19:58 | 118 | 2 | 10 (9 tube + 1 lip) | 114 | OD stepped up 116 → 118 after the 116 print fit loose. Superseded below before printing. | |
+| 2026-08-31 | 19:58 | 118 | 2 | 8 (7 tube + 1 lip) | 114 | Overall height reduced 10 → 8mm; tube body shortened to 7mm, lip unchanged at 1mm. Not yet printed. | |
+
 ## LED Sun Lid (`led_sun_lid/lid.py`)
 
 | Date | Revision | Rim OD (mm) | Hub Bore (mm) | Notes | Feedback |
