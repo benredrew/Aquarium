@@ -26,7 +26,7 @@ Iterating the top opening ID for the second vessel, the same way vessel 1's mout
 | 2026-08-31 | 19:17 | 116 | 2 | 10 (8 tube + 2 lip) | 112 | Overall height reduced 17 → 10mm; tube body shortened to 8mm, lip unchanged at 2mm. Superseded below before printing. | |
 | 2026-08-31 | 19:18 | 116 | 2 | 10 (9 tube + 1 lip) | 112 | Lip thickness reduced 2 → 1mm; tube body grew to 9mm to hold overall height at 10mm. Printed. | Loose. |
 | 2026-08-31 | 19:58 | 118 | 2 | 10 (9 tube + 1 lip) | 114 | OD stepped up 116 → 118 after the 116 print fit loose. Superseded below before printing. | |
-| 2026-08-31 | 19:58 | 118 | 2 | 8 (7 tube + 1 lip) | 114 | Overall height reduced 10 → 8mm; tube body shortened to 7mm, lip unchanged at 1mm. Not yet printed. | |
+| 2026-08-31 | 19:58 | 118 | 2 | 8 (7 tube + 1 lip) | 114 | Overall height reduced 10 → 8mm; tube body shortened to 7mm, lip unchanged at 1mm. Printed. | Fits — tighter end of good (reported 2026-09-01). Promoted `top_opening_id` to `spec/vessel_2.md`. |
 
 ## LED Sun Lid (`led_sun_lid/lid.py`)
 
