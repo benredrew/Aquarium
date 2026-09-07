@@ -15,11 +15,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
+import specs
 from cadquery.selectors import Selector
 from engrave import engrave_radial_text
 from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeVertex
 from OCP.BRepExtrema import BRepExtrema_DistShapeShape
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeChamfer, BRepFilletAPI_MakeFillet
+from OCP.BRepOffset import BRepOffset_Mode
+from OCP.BRepOffsetAPI import BRepOffsetAPI_MakeOffsetShape
+from OCP.GeomAbs import GeomAbs_JoinType
 from OCP.TopoDS import TopoDS
 from ocp_vscode import show_object, set_port
 
@@ -27,14 +31,16 @@ set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
-# --- Interface dimensions (measured) -------------------------------------
-VESSEL_TOP_ID = 167.0  # see ../DIMENSIONS.md
-LED_RING_OD_IN = 3.518
-LED_RING_OD = LED_RING_OD_IN * 25.4  # 89.3572 mm
-RING_LIGHT_THICKNESS = 0.525 * 25.4  # 13.3350 mm
-GLAND_DIA = 0.34 * 25.4  # 8.6360 mm
-GLAND_PROTRUSION = 0.07 * 25.4  # 1.7780 mm past the ring OD
-CABLE_DIA = 0.125 * 25.4  # 3.1750 mm
+# --- Interface dimensions ------------------------------------------------
+# Everything the lid has to fit around, read from the documents in ../spec/
+# rather than restated here. The ring light's figures are supplied in imperial
+# and converted once, in its own document.
+VESSEL_TOP_ID = specs.figure("vessel", "top_opening_id")
+LED_RING_OD = specs.figure("led_ring_light", "ring_od")
+RING_LIGHT_THICKNESS = specs.figure("led_ring_light", "ring_thickness")
+GLAND_DIA = specs.figure("led_ring_light", "gland_dia")
+GLAND_PROTRUSION = specs.figure("led_ring_light", "gland_protrusion")
+CABLE_DIA = specs.figure("led_ring_light", "cable_dia")
 
 # --- Design parameters ---------------------------------------------------
 WALL = 6.0  # rim wall, hub wall and spoke width
@@ -56,8 +62,11 @@ SPOKE_COUNT = 6
 LIP_WIDTH = 2.0  # radial reach of the retaining lip
 LIP_HEIGHT = 2.0  # vertical thickness of the retaining lip
 HUB_BORE = 89.5  # bore that hugs the ring light -- drives the fit
-PASSTHROUGH_CLEARANCE = 0.5  # radial gap around the gland and cable
+PASSTHROUGH_CLEARANCE = specs.figure("fits", "passthrough_radial")
 PASSTHROUGH_BLEND = 0.5  # blend on the exterior edges the passthrough opens up
+# Direction the cable leaves the hub, in degrees about Z. The cutters are built
+# along +Y and rotated to suit, so 90 is the identity.
+PASSTHROUGH_ANGLE = 90.0
 # Edges shorter than this are not handed to the fillet builder directly; see
 # blend_passthrough_edges. It wants to sit in the gap between the sliver edges
 # the cut leaves behind (~0.33mm) and the real ones (>1.3mm).
@@ -83,6 +92,28 @@ BOTTOM_BREAK_RISE = BOTTOM_BREAK_SPAN / (
 BOTTOM_BREAK_RUN = BOTTOM_BREAK_SPAN - BOTTOM_BREAK_RISE  # 0.7321
 
 Y_AXIS = cq.Vector(0, 1, 0)
+
+# --- Screen interface ----------------------------------------------------
+# The lid screen (../lid_screen/screen.py) drops into the open water between the
+# hub and the rim and hangs on a lip let into the lid's top face. Both halves of
+# that joint are dimensioned from here so they cannot drift apart: the lid cuts
+# the rebate, the screen fills it.
+#
+# Clearance applies to the walls only. The z-normal faces are left tight, so the
+# lip beds on the rebate floor and its top finishes flush with the lid face.
+SCREEN_CLEARANCE = specs.figure("fits", "free_wall_radial")
+SCREEN_LIP_WIDTH = 2.0  # reach of the lip past the screen wall, all the way round
+SCREEN_LIP_DEPTH = 2.0  # rebate depth, and so the lip thickness
+# Break on the lower edge of the rebate, where the floor meets the wall of the
+# void proper -- the edge the screen's body passes as it drops through. Gives
+# the screen a lead-in to meet the chamfer already on its own bottom edges.
+# It is taken out of the floor, so it costs bearing: the lip lands on
+# SCREEN_LIP_WIDTH minus SCREEN_CLEARANCE minus this.
+SCREEN_REBATE_CHAMFER = 0.5
+
+# Section height for sweep_prism. Anywhere in the full-width band between the
+# bottom break and the top chamfer will do; mid-height is squarely inside it.
+SECTION_SLAB = 0.02
 
 # Labels sit midway up, on the flat band of each interface surface: clear of
 # the bottom break and the lip below, and of the top chamfer above.
@@ -158,14 +189,19 @@ def break_bottom_edges(lid):
     return cq.Workplane(obj=cq.Shape.cast(builder.Shape()))
 
 
-def passthrough_cutters():
+def passthrough_cutters(angle_deg=None):
     """The solids the gland and cable sweep out on their way into the bore.
 
     The swept volume is the round gland plus everything directly above it: a
     cylinder that hugs the gland and cable, with a box standing on its axis to
     open the path up through the top face. The pocket keeps the round section
     so it follows the parts it clears.
+
+    Built along +Y and then rotated to `angle_deg`, so the shape of the pocket
+    is identical whichever way the cable faces.
     """
+    if angle_deg is None:
+        angle_deg = PASSTHROUGH_ANGLE
     gland_r = GLAND_DIA / 2 + PASSTHROUGH_CLEARANCE
     cable_r = CABLE_DIA / 2 + PASSTHROUGH_CLEARANCE
     y_start = HUB_IR - 5  # begin inside the bore, which is already void
@@ -188,10 +224,15 @@ def passthrough_cutters():
                 cq.Vector(-radius, y_start, GLAND_AXIS_Z),
             )
         )
+
+    delta = angle_deg - 90.0
+    if abs(delta) > 1e-9:
+        origin, z_axis = cq.Vector(0, 0, 0), cq.Vector(0, 0, 1)
+        cutters = [c.rotate(origin, z_axis, delta) for c in cutters]
     return cutters
 
 
-def blend_passthrough_edges(lid):
+def blend_passthrough_edges(lid, angle_deg=None):
     """Blend the exterior edges the passthrough cut opened up.
 
     Two filters decide what qualifies.
@@ -222,7 +263,7 @@ def blend_passthrough_edges(lid):
     solid = lid.val()
     base_volume = solid.Volume()
 
-    cutters = passthrough_cutters()
+    cutters = passthrough_cutters(angle_deg)
     tool = cutters[0]
     for extra in cutters[1:]:
         tool = tool.fuse(extra)
@@ -259,7 +300,7 @@ def _fillet(solid, edges):
     return cq.Shape.cast(builder.Shape())
 
 
-def cut_passthrough(lid):
+def cut_passthrough(lid, angle_deg=None):
     """Clear the ring light's cable gland and cable out through the hub wall.
 
     The light is installed by dropping it into the bore from above -- it cannot
@@ -269,18 +310,28 @@ def cut_passthrough(lid):
     and leave the lid unassemblable, so everything from the gland axis upward
     is opened out through the top face.
 
-    The gland sits at +Y, which falls midway between two spokes, so the cable
-    exits into an open window rather than through structure.
+    The gland sits at PASSTHROUGH_ANGLE, which must fall midway between two
+    spokes so the cable exits into an open window rather than through structure.
     """
     # Cut one tool at a time. These four solids deliberately overlap each other,
     # and a Compound of overlapping solids is not a valid boolean argument --
     # OCC silently leaves material behind rather than erroring.
-    for cutter in passthrough_cutters():
+    for cutter in passthrough_cutters(angle_deg):
         lid = lid.cut(cq.Workplane(obj=cutter))
     return lid
 
 
-def build_lid():
+# Angles (degrees) at which spokes are placed. The default is the full evenly
+# spaced set; variants pass their own, see lid_two_spoke.py.
+SPOKE_ANGLES = [360.0 * i / SPOKE_COUNT for i in range(SPOKE_COUNT)]
+
+
+def build_lid(spoke_angles=None, passthrough_angle=None):
+    if spoke_angles is None:
+        spoke_angles = SPOKE_ANGLES
+    if passthrough_angle is None:
+        passthrough_angle = PASSTHROUGH_ANGLE
+
     rim = cq.Workplane("XY").circle(OUTER_R).circle(RIM_IR).extrude(THICKNESS)
     hub = cq.Workplane("XY").circle(HUB_OR).circle(HUB_IR).extrude(THICKNESS)
 
@@ -288,13 +339,13 @@ def build_lid():
 
     spoke_len = SPOKE_OUTER_R - SPOKE_INNER_R
     spoke_mid = (SPOKE_OUTER_R + SPOKE_INNER_R) / 2
-    for i in range(SPOKE_COUNT):
+    for angle in spoke_angles:
         spoke = (
             cq.Workplane("XY")
             .rect(spoke_len, WALL)
             .extrude(THICKNESS)
             .translate((spoke_mid, 0, 0))
-            .rotate((0, 0, 0), (0, 0, 1), 360.0 * i / SPOKE_COUNT)
+            .rotate((0, 0, 0), (0, 0, 1), angle)
         )
         lid = lid.union(spoke)
 
@@ -326,8 +377,8 @@ def build_lid():
 
     # Cut last, so the passthrough's own edges are left sharp by the chamfer
     # selection above and get their own blend instead.
-    lid = cut_passthrough(lid)
-    lid = blend_passthrough_edges(lid)
+    lid = cut_passthrough(lid, passthrough_angle)
+    lid = blend_passthrough_edges(lid, passthrough_angle)
 
     # Label the two interface diameters on the surfaces they actually control,
     # the same way the test rings are labelled: engraved, never raised. A boss
@@ -341,6 +392,74 @@ def build_lid():
         lid, f"{HUB_BORE:g}", HUB_IR, -1, LABEL_Z, theta0=math.pi
     )
     return lid
+
+
+def sweep_prism(lid_shape, section_z=None):
+    """The volume `lid_shape` sweeps vertically, rather than the lid itself.
+
+    Anything that has to drop into the lid from above has to clear where the lid
+    is at every height on the way down, not only where it is at rest. Cutting a
+    mating part against the lid solid lets it grow into the reliefs the top
+    chamfer and bottom break open up, and those fillings then foul the
+    full-width section the moment the part is lifted -- seated fine, impossible
+    to install.
+
+    One section through the full-width band, extruded through the travel, gives
+    the silhouette that actually has to be cleared.
+    """
+    if section_z is None:
+        section_z = THICKNESS / 2
+
+    slab = (
+        cq.Workplane("XY")
+        .circle(OUTER_R + 5)
+        .extrude(SECTION_SLAB)
+        .translate((0, 0, section_z))
+    )
+    face = lid_shape.intersect(slab).faces(">Z").val()
+    prism = cq.Solid.extrudeLinear(
+        face.outerWire(), face.innerWires(), cq.Vector(0, 0, 3 * THICKNESS)
+    )
+    return cq.Workplane(obj=prism).translate((0, 0, -(THICKNESS + section_z)))
+
+
+def section_outline(shape, z):
+    """The outer boundary wire of `shape`'s horizontal section at height `z`."""
+    slab = (
+        cq.Workplane("XY")
+        .circle(OUTER_R + 20)
+        .extrude(SECTION_SLAB)
+        .translate((0, 0, z - SECTION_SLAB))
+    )
+    return shape.intersect(slab).faces(">Z").val().outerWire()
+
+
+def offset_solid(shape, distance):
+    """`shape` grown by `distance` on every face.
+
+    Run this on prisms -- the swept lid, the swept void -- not on the lid. A
+    prism is planar ends and vertical walls, which the offset algorithm handles
+    cleanly; the lid, with chamfers meeting fillets meeting the passthrough
+    blend, is the kind of shape it returns a null result on.
+
+    Growing a cutter is also the only way to get a gap that is uniform. Rotating
+    a part slightly to open a gap at its ends only offsets a surface where that
+    surface happens to run tangentially -- around a root fillet the normal
+    points elsewhere and the gap collapses to a fraction of what was asked.
+    """
+    builder = BRepOffsetAPI_MakeOffsetShape()
+    builder.PerformByJoin(
+        shape.val().wrapped,
+        distance,
+        1e-6,
+        BRepOffset_Mode.BRepOffset_Skin,
+        False,
+        False,
+        GeomAbs_JoinType.GeomAbs_Arc,
+        False,
+    )
+    builder.Build()
+    return cq.Workplane(obj=cq.Shape.cast(builder.Shape()))
 
 
 lid = build_lid()

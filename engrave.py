@@ -33,11 +33,14 @@ def _glyph_width(ch):
     return glyph.BoundingBox().xlen
 
 
-def engrave_radial_text(base, txt, radius, direction, z, theta0):
+def engrave_radial_text(base, txt, radius, direction, z, theta0, centre=(0.0, 0.0)):
     """Engrave `txt` into a cylindrical wall at the given radius and angle.
 
     direction: +1 for the outer wall (OD), -1 for the inner wall (ID).
     theta0: angle (radians) around the axis where the text is centered.
+    centre: the cylinder's own axis in XY, for a wall that is not centred on
+        the world origin -- e.g. the hub band in vessel_2_eclipse/eclipse.py.
+        Defaults to the origin, matching every caller before it existed.
 
     Each character sits on its own tangent plane so the flat cut tracks the
     curved wall closely -- engraving the whole string off one plane would leave
@@ -56,15 +59,19 @@ def engrave_radial_text(base, txt, radius, direction, z, theta0):
     offset = -sum(advances) / 2
 
     for ch, advance in zip(txt, advances):
-        centre = offset + advance / 2
+        char_x = offset + advance / 2
         offset += advance
         if ch.isspace():
             continue
         # Reading direction follows the plane's xDir, which runs with +theta on
         # the outer wall and with -theta on the inner wall.
-        theta = theta0 + direction * centre / radius
+        theta = theta0 + direction * char_x / radius
 
-        origin = cq.Vector(radius * math.cos(theta), radius * math.sin(theta), z)
+        origin = cq.Vector(
+            centre[0] + radius * math.cos(theta),
+            centre[1] + radius * math.sin(theta),
+            z,
+        )
         normal = cq.Vector(direction * math.cos(theta), direction * math.sin(theta), 0)
         # xDir = Z x normal, so the derived yDir (normal x xDir) is always +Z and
         # the text stays upright regardless of theta or which wall it sits on.

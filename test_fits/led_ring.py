@@ -1,6 +1,6 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Test-fit ring for the LED ring light (see ../LED_RING_LIGHT.md).
+"""Test-fit ring for the LED ring light (see ../spec/led_ring_light.md).
 
 Bore is the first whole millimetre above the light's 89.3572mm OD, so this
 checks how much clearance a nominal 90mm bore actually leaves once printed.
