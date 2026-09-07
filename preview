@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "$(readlink -f -- "$0")")"
+export FONTCONFIG_FILE="$PWD/fonts.conf"
+export AQUARIUM_FONT_PATH="${AQUARIUM_FONT_PATH:-/usr/share/fonts/liberation/LiberationSans-Bold.ttf}"
+exec .venv/bin/python "${@:-assembly.py}"

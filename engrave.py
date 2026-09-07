@@ -12,6 +12,7 @@ Text legibility with a 0.4mm nozzle: bold strokes need to print at least
 roughly 5mm. ENGRAVE_DEPTH must stay well under the part's wall thickness.
 """
 import math
+import os
 
 import cadquery as cq
 
@@ -20,13 +21,14 @@ ENGRAVE_DEPTH = 0.3
 OVERSHOOT = 0.3  # cutter start outside the wall, avoids coplanar-face booleans
 WIDTH_SCALE = 2.0  # stretch text 200% in the circumferential (width) direction
 TRACKING = 0.6  # extra gap between character cells, in mm of arc
+FONT_PATH = os.environ.get("AQUARIUM_FONT_PATH")
 NARROW_CHARS = ".,'"  # keep their own width rather than a full digit cell
 
 
 def _glyph_width(ch):
     """Unscaled inked width of a single character at FONT_SIZE."""
     glyph = cq.Workplane("XY").text(
-        ch, FONT_SIZE, 1.0, combine=False, kind="bold"
+        ch, FONT_SIZE, 1.0, combine=False, kind="bold", fontPath=FONT_PATH
     ).val()
     return glyph.BoundingBox().xlen
 
@@ -78,6 +80,7 @@ def engrave_radial_text(base, txt, radius, direction, z, theta0):
                 ENGRAVE_DEPTH + OVERSHOOT,
                 combine=False,
                 kind="bold",
+                fontPath=FONT_PATH,
                 halign="center",
                 valign="center",
             )

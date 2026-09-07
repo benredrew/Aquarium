@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd -- "$(dirname -- "$(readlink -f -- "$0")")"
+systemctl --user start aquarium-viewer.service
+for attempt in {1..60}; do
+  if curl --silent --fail http://127.0.0.1:3939/ >/dev/null; then
+    exec omarchy launch webapp http://127.0.0.1:3939/
+  fi
+  sleep 1
+done
+echo 'Viewer failed to start. Check: journalctl --user -u aquarium-viewer.service' >&2
+exit 1
