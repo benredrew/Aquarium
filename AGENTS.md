@@ -104,9 +104,9 @@ checkout. Consequences worth internalising:
   appear modified are theirs; leave them.
 - **Do not switch branches.** The checkout is shared, so `git switch` moves the
   tree for every other session mid-edit. Commit on the current branch, or wait.
-- `user.name` is unset in git config; `user.email` is set. Commits need
-  `GIT_AUTHOR_NAME=benredrew GIT_COMMITTER_NAME=benredrew`, matching every
-  existing commit, unless Brendan sets the config.
+- git identity is configured globally; commits need no `GIT_AUTHOR_NAME`
+  incantation. (It did until 2026-09-26, when `user.name` was finally set —
+  ignore any older instruction telling you to export it.)
 - Hyprland window IDs go stale fast while other sessions rearrange the desktop.
   Re-query `hyprctl clients -j` immediately before acting, and check what you
   acted on afterwards.
