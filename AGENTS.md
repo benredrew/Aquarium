@@ -104,9 +104,13 @@ checkout. Consequences worth internalising:
   appear modified are theirs; leave them.
 - **Do not switch branches.** The checkout is shared, so `git switch` moves the
   tree for every other session mid-edit. Commit on the current branch, or wait.
-- git identity is configured globally; commits need no `GIT_AUTHOR_NAME`
-  incantation. (It did until 2026-09-26, when `user.name` was finally set —
-  ignore any older instruction telling you to export it.)
+- **The human is the author; you are a co-author.** Commits are authored by
+  benredrew from the global git config — do not override it. Credit yourself
+  in a `Co-Authored-By:` trailer. These repositories are public and are
+  Brendan's portfolio; a commit authored by an agent shows on GitHub as an
+  unlinked contributor, so his work stops counting as his. The no-reply
+  address in that config is deliberate — his real one was scrubbed from every
+  repository on 2026-09-27.
 - Hyprland window IDs go stale fast while other sessions rearrange the desktop.
   Re-query `hyprctl clients -j` immediately before acting, and check what you
   acted on afterwards.
