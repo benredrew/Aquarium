@@ -8,7 +8,9 @@ plus the workshop jigs built to make them.
 Open **OCPViewer** from the application launcher, or run `./viewer`.
 The viewer opens in its own app-style window without choosing or loading an assembly.
 Tools and Info start collapsed; click their toggles to expand them.
-The service runs `viewer_server.py`, which applies these startup defaults.
+The service runs `cad-python -m cadkit.viewer --server`, which applies these
+startup defaults. They live in the shared `cadkit` package rather than here,
+so every CAD project on this machine opens the same unobtrusive window.
 The local OCP viewer runs on `127.0.0.1:3939` as the user service
 `aquarium-viewer.service`, started on demand.
 
