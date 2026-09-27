@@ -3,14 +3,25 @@
 CadQuery models for the aquarium lid, LED ring reference, and test-fit parts,
 plus the workshop jigs built to make them.
 
-## Omarchy viewer
+## Toolbox runtime and viewer
+
+Install [Toolbox](https://github.com/benredrew/toolbox) once, then run its
+`./install` command. It installs the pinned CAD runtime and a `toolbox`
+command. Aquarium's `preview` and fit-gauge wrappers use that command; this
+repository has no Python environment of its own.
+
+Install Aquarium's viewer service once after Toolbox is available:
+
+```bash
+./install-viewer-service
+```
 
 Open **OCPViewer** from the application launcher, or run `./viewer`.
 The viewer opens in its own app-style window without choosing or loading an assembly.
 Tools and Info start collapsed; click their toggles to expand them.
-The service runs `cad-python -m cadkit.viewer --server`, which applies these
-startup defaults. They live in the shared `cadkit` package rather than here,
-so every CAD project on this machine opens the same unobtrusive window.
+The service runs `toolbox viewer --server`, which applies these startup
+defaults. They live in the shared CadKit package rather than here, so every
+CAD project on this machine opens the same unobtrusive window.
 The local OCP viewer runs on `127.0.0.1:3939` as the user service
 `aquarium-viewer.service`, started on demand.
 
@@ -25,10 +36,9 @@ produce their STEP exports, for example `./preview led_sun_lid/lid.py`.
 The wrapper uses a project-local font configuration compatible with the CAD
 library on Linux; Arial falls back to Liberation Sans for engraving.
 
-Dependencies are installed in `.venv` using Python 3.12; direct dependencies
-are in `requirements.txt` and the complete installed versions in
-`requirements-lock.txt`. The desktop entry and systemd service are local
-machine setup, outside this repository.
+The service template is committed at `systemd/aquarium-viewer.service`; its
+installer copies it into the user systemd directory. The desktop entry remains
+local machine setup.
 
 To stop the viewer server: `systemctl --user stop aquarium-viewer.service`.
 To inspect logs: `journalctl --user -u aquarium-viewer.service`.

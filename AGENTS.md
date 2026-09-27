@@ -8,8 +8,10 @@ For any agent — Claude, Codex, or otherwise. `CLAUDE.md` points here so there
 is one copy of this rather than two that drift apart.
 
 CadQuery models of aquarium and workshop parts, built to fit real objects.
-Python 3.12 in `.venv`. Run a part with `./preview <path>`, which sets the font
-configuration the engraver needs; `./preview` alone loads the assembly.
+Install [Toolbox](https://github.com/benredrew/toolbox) and run its
+`./install` command once. Run a part with `./preview <path>`; `./preview`
+alone loads the assembly. This repository must not create or rely on `.venv`,
+`cad-python`, or a sibling checkout.
 
 ## Numbers come from `spec/`, never from your head
 
@@ -34,8 +36,8 @@ not fill in a Confirmed date you did not witness.
 
 ## Viewing and drawings: the shared `cadkit` package
 
-Neither lives in this repository. Both are in `~/Projects/cadkit`, shared with
-the other CAD projects -- see `~/Projects/cadkit/AGENTS.md`.
+Neither lives in this repository. Both come from Toolbox's pinned CadKit
+release.
 
 **They are optional, and must stay that way.** Building a part may not require
 a viewer to be running or a sheet to be drawn; a plain rebuild is the cheap
@@ -86,8 +88,8 @@ yours. Start your own on a genuinely free port -- 3939 is this service and
 3940/3941 are Oil_Shelf's. `cadkit` knows which are spoken for:
 
 ```bash
-cad-python -m cadkit.viewer --status    # who is up
-cad-python -m cadkit.viewer             # start one on a free port
+toolbox viewer --status    # who is up
+toolbox viewer             # start one on a free port
 ```
 
 It prints `CAD_VIEWER_PORT=<n>`; export that and `cad_viewer.show` uses it.

@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
-# Compatibility wrapper for the reusable cylindrical fit-test command.
+# Compatibility wrapper for the reusable cylindrical fit-test command. It
+# deliberately builds the labelled gauge and stops; slicing remains Toolbox's
+# separate, explicit operation.
 set -euo pipefail
-exec "$HOME/.local/bin/print-cylinder-test" "$@"
+if ! command -v toolbox >/dev/null 2>&1; then
+  echo 'Aquarium requires Toolbox. Install it, then run Toolbox ./install.' >&2
+  exit 127
+fi
+exec toolbox fit cylinder "$@"

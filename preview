@@ -4,4 +4,8 @@
 # reason parts only built through this wrapper -- see the 2026-09-27 commits.
 set -euo pipefail
 cd -- "$(dirname -- "$(readlink -f -- "$0")")"
-exec .venv/bin/python "${@:-assembly.py}"
+if ! command -v toolbox >/dev/null 2>&1; then
+  echo 'Aquarium requires Toolbox. Install it, then run Toolbox ./install.' >&2
+  exit 127
+fi
+exec toolbox python "${@:-assembly.py}"

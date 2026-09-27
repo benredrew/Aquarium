@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source="$root/systemd/aquarium-viewer.service"
+target="$HOME/.config/systemd/user/aquarium-viewer.service"
+
+if ! command -v toolbox >/dev/null 2>&1; then
+  echo 'Aquarium requires Toolbox. Install it, then run Toolbox ./install.' >&2
+  exit 127
+fi
+
+install -d "$HOME/.config/systemd/user"
+install -m 0644 "$source" "$target"
+systemctl --user daemon-reload
+systemctl --user restart aquarium-viewer.service
