@@ -519,6 +519,7 @@ minting a new one, so the link Brendan holds stays good.
         <ul>
           <li><span class="fname">specs.py</span>Reads the documents.</li>
           <li><span class="fname">engrave.py</span>Puts labels on parts.</li>
+          <li><span class="fname">cadkit<span class="tag tag-none">external</span></span>Not in this repository — <code>~/Projects/cadkit</code>, shared with the other CAD projects and reached through <code>cad-python</code>. <code>cadkit.sheet</code> draws the standard orthographic sheet (third angle, four views to one scale, hatched section, dark on screen and light when printed); <code>cadkit.viewer</code> finds or starts a viewer. Both are optional by design: <code>viewer.show</code> returns False rather than raising when nothing is listening, which is what lets a part build with no GUI up.</li>
           <li><span class="fname">print_volume.py</span>The 180mm bed, plus the fit check that refuses to export an oversize part. <code>bounds()</code> is the honest way to measure a curved part — vertices under-report an arc, and did so by 1.7mm here.</li>
         </ul>
       </div>
@@ -531,6 +532,7 @@ minting a new one, so the link Brendan holds stays good.
           <li><span class="fname">led_sun_lid/lid.py<span class="tag tag-step">step</span></span>The sun dial lid, master version.</li>
           <li><span class="fname">led_sun_lid/lid_two_spoke.py<span class="tag tag-step">step</span></span>The two-spoke variant.</li>
           <li><span class="fname">lid_screen/screen.py<span class="tag tag-step">step</span></span>The screen. Exports three files — both bodies together, then each alone, so they can take different print settings.</li>
+          <li><span class="fname">lamp_shade/shade.py<span class="tag tag-step">step</span></span>Lamp shade lid for the original vessel: the 167 mouth at the bottom, LED Ring Light 1 in the 89.5 bore at the top, and a surface of revolution between them. Both faces are sampled from one <code>SHADE_PROFILE</code> with the endpoints substituted in exactly, so a new silhouette can restyle the part but cannot move either fit. <code>--sheet</code> draws it, <code>--no-show</code> skips the viewer; neither is needed to build. <b>Not printed</b> — both diameters are inherited from confirmed figures, but nothing about this part is evidence yet. Watch the cone: 16mm of height across 36.75mm of flare puts both faces 23.5&deg; from horizontal, which no FDM printer bridges — <code>SHADE_H</code> ≈ 37 would reach 45&deg;.</li>
         </ul>
       </div>
       <div class="card">
@@ -549,6 +551,7 @@ minting a new one, so the link Brendan holds stays good.
   <section>
     <h2>Loose ends, so they don't surprise you</h2>
     <ul class="loose">
+      <li><b>This map is hand-written, and it drifts.</b> It was last brought up to date at <code>8e53515</code>, and several parts committed since are missing from it entirely — <code>vessel_2_eclipse</code>, <code>vessel_3_eclipse</code>, <code>led_ring_light_2</code>, <code>ring_light_plug</code>, <code>vessel_2_standin</code> and <code>saw_block</code> among them. The lamp shade was added by hand on 2026-09-26 and the same fate awaits it. Unlike the drawing sheets, which are regenerated from the solid they describe and so cannot lie, nothing here is derived from anything — treat a silence in this document as "nobody updated it", never as "that part does not exist". The file listing is the part worth generating if this keeps happening.</li>
       <li><b>Every figure is now wired.</b> The ring light was the last one holding its dimensions in two places; as of 2026-08-08 both <code>ring_light.py</code> and <code>lid.py</code> read them from the document. Reading the document's <code>89.3572</code> rather than computing <code>3.518 × 25.4</code> shifted the parts by about a millionth of a cubic millimetre — solver noise, not a design change, and the print is unaffected.</li>
       <li><b>The base corner radius is settled at 8mm</b> — by printing 45&deg; cradle sections and holding them against the glass until the curve matched. That is a visual match, not a caliper reading, but it is evidence about the object rather than about a photograph.</li>
       <li><b>The vessel model is photo-derived and locked, not measured.</b> One image, scaled by the one confirmed diameter. Good to a percent or two on the diameters; the lower waist is the weakest part, since the substrate line crosses it in the picture and I overrode the outline there to match the upper waist. It is deliberately <em>not</em> written into <code>spec/vessel.md</code> — that document holds confirmed figures, and a second copy of these would drift.</li>
