@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import cadquery as cq
 import print_volume
 import specs
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 from cadkit.viewer import show as show_object
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeFillet
 from OCP.TopoDS import TopoDS
@@ -126,7 +126,7 @@ BOTTOM_BREAK_RUN = BOTTOM_BREAK_SPAN - BOTTOM_BREAK_RISE
 
 # --- Labels ------------------------------------------------------------
 # Engraved, never raised -- a boss would fatten the OD or pinch the bore it
-# labels, see engrave.py. Both sit at mid-height on the flat vertical band,
+# labels, see cadkit.engrave. Both sit at mid-height on the flat vertical band,
 # clear of the top chamfer and bottom break.
 LABEL_Z = THICK / 2
 # Total OD at the top of the part (theta=90 deg), clear of the tangent points

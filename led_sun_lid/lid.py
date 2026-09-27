@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrav
 import cadquery as cq
 import specs
 from cadquery.selectors import Selector
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 from OCP.BRepBuilderAPI import BRepBuilderAPI_MakeVertex
 from OCP.BRepExtrema import BRepExtrema_DistShapeShape
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeChamfer, BRepFilletAPI_MakeFillet

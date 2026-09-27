@@ -59,7 +59,7 @@ import specs
 from cadquery.selectors import Selector
 from cadkit import sheet as cad_sheet
 from cadkit import viewer as cad_viewer
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
@@ -154,7 +154,7 @@ BREAK_FRACTIONS = (1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3)
 
 # --- Labels ----------------------------------------------------------------
 # Engraved, never raised: a boss on either of these walls would corrupt the fit
-# it names. See engrave.py.
+# it names. See cadkit.engrave.
 SEAT_LABEL_Z = SEAT_H / 2
 HUB_LABEL_Z = (SEAT_Z + TOP_Z) / 2
 SEAT_LABEL_THETA = -math.pi / 2     # -Y, opposite the passthrough at +Y

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+# cadkit.engrave resolves its own font and points fontconfig at its own
+# configuration, so this no longer sets either. It used to, and that was the
+# reason parts only built through this wrapper -- see the 2026-09-27 commits.
 set -euo pipefail
 cd -- "$(dirname -- "$(readlink -f -- "$0")")"
-export FONTCONFIG_FILE="$PWD/fonts.conf"
-export AQUARIUM_FONT_PATH="${AQUARIUM_FONT_PATH:-/usr/share/fonts/liberation/LiberationSans-Bold.ttf}"
 exec .venv/bin/python "${@:-assembly.py}"

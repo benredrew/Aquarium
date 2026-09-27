@@ -45,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrav
 import cadquery as cq
 import print_volume
 import specs
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 from cadkit.viewer import show as show_object
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeFillet
 from OCP.TopoDS import TopoDS

@@ -26,9 +26,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
-import engrave as engrave_module
+from cadkit import engrave as engrave_module
 import print_volume
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"

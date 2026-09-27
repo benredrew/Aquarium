@@ -22,7 +22,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
-from engrave import labelled_ring
+from cadkit.engrave import labelled_ring
 from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"

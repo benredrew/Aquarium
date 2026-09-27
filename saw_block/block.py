@@ -79,7 +79,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import cadquery as cq
-from engrave import engrave_planar_text
+from cadkit.engrave import engrave_planar_text
 import print_volume
 import specs
 from cadkit.viewer import show as show_object

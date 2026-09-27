@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import cadquery as cq
-from engrave import engrave_radial_text
+from cadkit.engrave import engrave_radial_text
 import print_volume
 import specs
 from cadquery.selectors import Selector

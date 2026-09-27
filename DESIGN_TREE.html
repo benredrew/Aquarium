@@ -521,7 +521,6 @@ minting a new one, so the link Brendan holds stays good.
         <h3>Shared code</h3>
         <ul>
           <li><span class="fname">specs.py</span>Reads the documents.</li>
-          <li><span class="fname">engrave.py</span>Puts labels on parts.</li>
           <li><span class="fname">cadkit<span class="tag tag-none">external</span></span>Not in this repository — <code>~/Projects/cadkit</code>, shared with the other CAD projects and reached through <code>cad-python</code>. <code>cadkit.sheet</code> draws the standard orthographic sheet (third angle, four views to one scale, hatched section, dark on screen and light when printed); <code>cadkit.viewer</code> finds or starts a viewer, and since 2026-09-26 owns the viewer's startup defaults too — the panel settings that used to live in this repository's own <code>viewer_server.py</code>, which was deleted when they moved. The <code>aquarium-viewer.service</code> unit runs <code>cad-python -m cadkit.viewer --server</code>. Both are optional by design: <code>viewer.show</code> returns False rather than raising when nothing is listening, which is what lets a part build with no GUI up.</li>
           <li><span class="fname">print_volume.py</span>The 180mm bed, plus the fit check that refuses to export an oversize part. <code>bounds()</code> is the honest way to measure a curved part — vertices under-report an arc, and did so by 1.7mm here.</li>
         </ul>

@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared specs
 
 import cadquery as cq
-import engrave
+from cadkit import engrave
 import specs
 from cadquery.selectors import RadiusNthSelector
 from cadkit.viewer import show as show_object
@@ -66,12 +66,14 @@ LABEL_SIZE = 8.0
 LABEL_DEPTH = 0.5
 LABEL_OVERSHOOT = 0.1
 # The resolved font, not a second reading of the environment. This line was
-# `os.environ.get("AQUARIUM_FONT_PATH")`, which is None unless ./preview
-# exported it -- so the label cutter below passed fontPath=None, CadQuery fell
+# `os.environ.get("AQUARIUM_FONT_PATH")`, which was None unless the ./preview
+# wrapper had exported it -- so the label cutter below passed fontPath=None,
+# CadQuery fell
 # back to a font that does not exist here, and the part died in makeText with
-# an IndexError naming neither fonts nor this variable. engrave.py resolves a
-# font that is proven to render; there is no reason for a second copy of the
-# lookup, and a second copy is exactly how this drifted.
+# an IndexError naming neither fonts nor this variable. cadkit.engrave resolves
+# a font that is proven to render, and nothing exports that variable any more;
+# there is no reason for a second copy of the lookup, and a second copy is
+# exactly how this drifted.
 FONT_PATH = engrave.FONT_PATH
 
 

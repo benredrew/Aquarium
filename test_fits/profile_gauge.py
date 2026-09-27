@@ -64,7 +64,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrave
 
 import cadquery as cq
-import engrave
+from cadkit import engrave
 import print_volume
 from cadkit.viewer import show as show_object
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeFillet
