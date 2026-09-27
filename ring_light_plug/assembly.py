@@ -2,7 +2,7 @@
 import importlib.util
 from pathlib import Path
 
-from ocp_vscode import set_port, show_object
+from cadkit.viewer import show as show_object
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -36,7 +36,6 @@ plug = plant_lid.plug.translate(
 )
 
 if __name__ == "__main__":
-    set_port(3939)
     show_object(
         vessel.standin,
         name="vessel_2_standin",

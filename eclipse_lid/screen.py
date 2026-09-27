@@ -45,12 +45,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import cadquery as cq
 import print_volume
 import specs
-from ocp_vscode import show_object, set_port
+from cadkit.viewer import show as show_object
 from OCP.BRepOffset import BRepOffset_Mode
 from OCP.BRepOffsetAPI import BRepOffsetAPI_MakeOffsetShape
 from OCP.GeomAbs import GeomAbs_JoinType
-
-set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 

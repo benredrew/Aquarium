@@ -19,9 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrav
 import cadquery as cq
 import specs
 from engrave import engrave_radial_text
-from ocp_vscode import show_object, set_port
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 

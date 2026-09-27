@@ -82,9 +82,7 @@ import cadquery as cq
 from engrave import engrave_planar_text
 import print_volume
 import specs
-from ocp_vscode import Camera, set_port, show_object
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
@@ -358,7 +356,7 @@ if __name__ == "__main__":
         name="saw_block",
         options={"color": (215, 170, 105), "alpha": 1.0},
         clear=True,
-        reset_camera=Camera.RESET,
+        reset_camera="reset",
     )
     show_object(
         cleat,

@@ -36,9 +36,7 @@ from OCP.BRepOffset import BRepOffset_Mode
 from OCP.BRepOffsetAPI import BRepOffsetAPI_MakeOffsetShape
 from OCP.GeomAbs import GeomAbs_JoinType
 from OCP.TopoDS import TopoDS
-from ocp_vscode import show_object, set_port
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 

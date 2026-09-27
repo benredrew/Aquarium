@@ -57,11 +57,9 @@ import cadquery as cq
 import print_volume
 import specs
 from engrave import engrave_radial_text
-from ocp_vscode import show_object, set_port
+from cadkit.viewer import show as show_object
 from OCP.BRepFilletAPI import BRepFilletAPI_MakeFillet
 from OCP.TopoDS import TopoDS
-
-set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 

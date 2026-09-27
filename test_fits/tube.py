@@ -23,9 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # shared engrav
 
 import cadquery as cq
 from engrave import labelled_ring
-from ocp_vscode import Camera, show_object, set_port
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
@@ -45,7 +43,7 @@ show_object(
     tube,
     name="test_fit_tube",
     clear=True,
-    reset_camera=Camera.RESET,
+    reset_camera="reset",
 )
 
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

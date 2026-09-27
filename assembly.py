@@ -15,9 +15,7 @@ estimate; the parts themselves are all to size.
 import importlib.util
 from pathlib import Path
 
-from ocp_vscode import show_object, set_port
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 ROOT = Path(__file__).parent
 

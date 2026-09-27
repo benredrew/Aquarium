@@ -18,9 +18,7 @@ from engrave import engrave_radial_text
 import print_volume
 import specs
 from cadquery.selectors import Selector
-from ocp_vscode import set_port, show_object
-
-set_port(3939)
+from cadkit.viewer import show as show_object
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
