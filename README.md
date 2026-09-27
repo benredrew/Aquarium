@@ -1,6 +1,7 @@
 # Aquarium
 
-CadQuery models for the aquarium lid, LED ring reference, and test-fit parts.
+CadQuery models for the aquarium lid, LED ring reference, and test-fit parts,
+plus the workshop jigs built to make them.
 
 ## Omarchy viewer
 
@@ -29,3 +30,20 @@ machine setup, outside this repository.
 
 To stop the viewer server: `systemctl --user stop aquarium-viewer.service`.
 To inspect logs: `journalctl --user -u aquarium-viewer.service`.
+
+## Workshop parts
+
+`saw_block/` is not aquarium hardware — it is a mitre block for square hand-sawn
+cuts, cut to the hacksaw in `spec/hacksaw.md` and the stock in `spec/lumber.md`.
+It lives here because it reads the same `spec/` documents and the same build
+volume as everything else. It prints in two pieces:
+
+```bash
+./preview saw_block/block.py
+```
+
+- `saw_block.step` — the block, as modelled: floor down, no supports.
+- `saw_block_cleat.step` — the bench-hook cleat, lip down, as it is used.
+
+The cleat slides into a dovetail along the underside and wants a mallet tap, not
+a push. Neither part needs supports.
