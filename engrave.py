@@ -13,6 +13,23 @@ roughly 5mm. ENGRAVE_DEPTH must stay well under the part's wall thickness.
 """
 import math
 import os
+import subprocess
+from pathlib import Path
+
+# Point fontconfig at the project's own configuration before CadQuery can
+# initialise it. The CAD wheel bundles an older fontconfig than the system's,
+# and Arch's /etc/fonts/conf.d/48-guessfamily.conf uses `xsi:nil` and generic
+# family constants that the bundled one cannot parse -- so every direct run
+# printed fifty lines of "invalid attribute" and "invalid constant used"
+# before doing any work. Nothing was actually wrong, which is worse: an agent
+# reading that output has to decide it is noise.
+#
+# ./preview has always exported this. Doing it here as well means a part run
+# straight through `cad-python` is as quiet as one run through the wrapper,
+# and the wrapper's value still wins if it is set.
+_FONTS_CONF = Path(__file__).resolve().parent / "fonts.conf"
+if "FONTCONFIG_FILE" not in os.environ and _FONTS_CONF.is_file():
+    os.environ["FONTCONFIG_FILE"] = str(_FONTS_CONF)
 
 import cadquery as cq
 
@@ -21,7 +38,85 @@ ENGRAVE_DEPTH = 0.3
 OVERSHOOT = 0.3  # cutter start outside the wall, avoids coplanar-face booleans
 WIDTH_SCALE = 2.0  # stretch text 200% in the circumferential (width) direction
 TRACKING = 0.6  # extra gap between character cells, in mm of arc
-FONT_PATH = os.environ.get("AQUARIUM_FONT_PATH")
+# Fonts are resolved here, once, and the answer is a file that has been proven
+# to produce glyphs -- not a name, and not a hope.
+#
+# This used to read `os.environ.get("AQUARIUM_FONT_PATH")` and nothing else, so
+# FONT_PATH was None unless ./preview had exported it. CadQuery then asked for
+# its default font, Arial, which does not exist on this machine; the request
+# returned a shape with no faces, and OCCT indexed Faces()[0] on it. The part
+# died with `IndexError: list index out of range` from inside makeText, which
+# names neither fonts nor the missing variable. Three parts were broken that
+# way and it read as a CadQuery bug.
+#
+# It stayed hidden because every part was run through ./preview, which sets the
+# variable. That is no longer true: `cad-python part.py` runs a part directly,
+# and a model that only builds through one bash wrapper is not really building.
+#
+# Candidates are *tested*, not merely found. A font file that exists but yields
+# no geometry for our own FONT_SIZE and weight is the exact failure above, and
+# checking the path exists would not have caught it.
+FONT_CANDIDATES = (
+    "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/TTF/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/liberation-fonts/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/noto/NotoSans-Bold.ttf",
+)
+
+
+def _renders(path):
+    """True if this font actually yields glyph geometry at our size and weight."""
+    try:
+        shape = cq.Workplane("XY").text(
+            "8", FONT_SIZE, 1.0, combine=False, kind="bold", fontPath=path
+        ).val()
+        return bool(shape.Faces())
+    except Exception:
+        return False
+
+
+def _fontconfig_bold_sans():
+    """Whatever fontconfig calls a bold sans here, as a file path."""
+    try:
+        out = subprocess.run(
+            ["fc-match", "-f", "%{file}", "sans:bold"],
+            capture_output=True, text=True, timeout=5,
+        )
+        return out.stdout.strip() or None
+    except Exception:
+        return None
+
+
+def _resolve_font():
+    explicit = os.environ.get("AQUARIUM_FONT_PATH")
+    if explicit:
+        # An explicit request that does not work is an error, never something
+        # to quietly paper over -- the label would silently change shape.
+        if not Path(explicit).is_file():
+            raise RuntimeError(f"AQUARIUM_FONT_PATH={explicit!r} is not a file")
+        if not _renders(explicit):
+            raise RuntimeError(
+                f"AQUARIUM_FONT_PATH={explicit!r} renders no glyphs at "
+                f"{FONT_SIZE}mm bold"
+            )
+        return explicit
+    for candidate in FONT_CANDIDATES:
+        if Path(candidate).is_file() and _renders(candidate):
+            return candidate
+    found = _fontconfig_bold_sans()
+    if found and _renders(found):
+        return found
+    raise RuntimeError(
+        "no usable bold font found. Engraving needs a TrueType bold sans; "
+        "tried AQUARIUM_FONT_PATH, then " + ", ".join(FONT_CANDIDATES)
+        + ", then fc-match sans:bold. Install one (ttf-liberation) or set "
+        "AQUARIUM_FONT_PATH to a font file that works."
+    )
+
+
+FONT_PATH = _resolve_font()
 NARROW_CHARS = ".,'"  # keep their own width rather than a full digit cell
 
 
