@@ -29,3 +29,4 @@ Rows are keyed the same way as `vessel.md`: `specs.figure("vessel_2", "top_openi
 - Nothing else about this vessel is measured yet. This document is expected to fill in the same way `vessel.md` did: literals dialled in a test-fit script, promoted here only once a print (or a direct instrument reading) confirms them.
 - The **top opening ID of 118mm** is the reference dimension for anything seating into this vessel's mouth, the same role `top_opening_id` plays in `vessel.md`. Read it via `specs.figure("vessel_2", "top_opening_id")` rather than retyping 118.
 - It fit on the tighter end of good rather than with margin — a part designed to seat here should probably not assume the 0.2mm free fit used elsewhere (see [fits.md](fits.md)) unless retested.
+- Vessel 2 lid models depend on **LED Ring Light 2** (`led_ring_light_2.md`).

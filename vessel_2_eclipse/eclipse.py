@@ -15,7 +15,7 @@ HUB_OR=56.75, offset (between centres) 26.75 -- |71.5-56.75|=14.75 < 26.75 <
 touch at a point.
 
 On Vessel 2 the same check holds and by a wider margin: OUTER_IR=53, HUB_OR
-=50.75, offset 8.25 -- |53-50.75|=2.25 < 8.25 < 103.75. The bands still cross,
+=50.5, offset 8.5 -- |53-50.5|=2.5 < 8.5 < 103.5. The bands still cross,
 still overlap in a real lens, and the union is still one connected solid
 without the struts. Requested 2026-09-01 (Brendan: "in the eclipse style, but
 without the two smallest circles") after the wheel-style vessel_2_lid/lid.py
@@ -26,9 +26,8 @@ file's docstring for the radial-budget numbers that motivated the switch.
 
 Same rule as eclipse_lid/eclipse.py: nothing here is a chosen diameter. The
 outer band is Vessel 2's top opening (spec/vessel_2.md, seated with no
-allowance per spec/fits.md) and the inner band is the same standard 89.5
-slip bore over the same ring light. The offset falls out of those two and
-BRANCH.
+allowance per spec/fits.md) and the inner band is the 89.0mm slip bore for
+LED Ring Light 2. The offset falls out of those two and BRANCH.
 """
 import math
 import sys
@@ -49,26 +48,27 @@ set_port(3939)
 OUTPUT_DIR = Path(__file__).parent / "output"
 
 PART_ROTATION = 90.0    # about +Z, right hand, applied to the finished body
-THICK = 16.0            # z -- unchanged from eclipse_lid, same ring light
+THICK = 16.0            # z -- unchanged from eclipse_lid
 BRANCH = 6.0            # radial width of both bands
 MIN_Z_RADIUS = 1.5      # least radius allowed about a vertical axis
 
 # --- The two bands ---------------------------------------------------------
 MOUTH_ID = specs.figure("vessel_2", "top_opening_id")
 MOUTH_FIT = specs.figure("fits", "vessel_mouth_radial")
-HUB_BORE = 89.5         # the standard slip bore over the ring light's OD
-RING_OD = specs.figure("led_ring_light", "ring_od")
-RING_THICK = specs.figure("led_ring_light", "ring_thickness")
+RING_SPEC = "led_ring_light_2"
+RING_OD = specs.figure(RING_SPEC, "ring_od")
+RING_THICK = specs.figure(RING_SPEC, "ring_thickness")
+HUB_BORE = RING_OD + 2 * specs.figure("fits", "ring_light_bore_radial")
 
 OUTER_R = MOUTH_ID / 2 - MOUTH_FIT      # 59.0
 OUTER_IR = OUTER_R - BRANCH             # 53.0
-HUB_IR = HUB_BORE / 2                   # 44.75
-HUB_OR = HUB_IR + BRANCH                # 50.75
+HUB_IR = HUB_BORE / 2                   # 44.50
+HUB_OR = HUB_IR + BRANCH                # 50.50
 
 # Centrelines, and the offset that makes them touch.
 OUTER_CL = (OUTER_R + OUTER_IR) / 2     # 56.00
-HUB_CL = (HUB_IR + HUB_OR) / 2          # 47.75
-OFFSET = OUTER_CL - HUB_CL              # 8.25, along +X -- 26.75 on Vessel 1
+HUB_CL = (HUB_IR + HUB_OR) / 2          # 47.50
+OFFSET = OUTER_CL - HUB_CL              # 8.50, along +X -- 26.75 on Vessel 1
 
 # --- The lip ---------------------------------------------------------------
 LIP_WIDTH = 2.0         # radial reach inward, what the light rests on
@@ -78,10 +78,10 @@ GLAND_AXIS_Z = LIP_HEIGHT + RING_THICK / 2
 RING_TOP_Z = LIP_HEIGHT + RING_THICK    # 15.335, inside the 16
 
 # --- Passthrough -----------------------------------------------------------
-GLAND_DIA = specs.figure("led_ring_light", "gland_dia")
-CABLE_DIA = specs.figure("led_ring_light", "cable_dia")
-GLAND_PROTRUSION = specs.figure("led_ring_light", "gland_protrusion")
-CABLE_PROTRUSION = specs.figure("led_ring_light", "cable_protrusion")
+GLAND_DIA = specs.figure(RING_SPEC, "gland_dia")
+CABLE_DIA = specs.figure(RING_SPEC, "cable_dia")
+GLAND_PROTRUSION = specs.figure(RING_SPEC, "gland_protrusion")
+CABLE_PROTRUSION = specs.figure(RING_SPEC, "cable_protrusion")
 PASSTHROUGH_CLEARANCE = specs.figure("fits", "passthrough_radial")
 PASSTHROUGH_ANGLE = 180.0   # -X from the hub centre, directly away from the
 # tangent points (both at angle 0, +X -- see module docstring). Changed from
@@ -225,7 +225,7 @@ def blend_crossings(shape, radius):
 GLAND_R = GLAND_DIA / 2 + PASSTHROUGH_CLEARANCE
 CABLE_R = CABLE_DIA / 2 + PASSTHROUGH_CLEARANCE
 GLAND_END = RING_OD / 2 + GLAND_PROTRUSION + PASSTHROUGH_CLEARANCE
-BEND_OD_OD = specs.figure("led_ring_light", "cable_bend_od_od")
+BEND_OD_OD = specs.figure(RING_SPEC, "cable_bend_od_od")
 BEND_R = (BEND_OD_OD - CABLE_DIA) / 2
 
 
@@ -439,8 +439,15 @@ def build():
 
 eclipse, BLENDED, N_TOP, N_BOTTOM = build()
 
+# Display upright while retaining the bed orientation in `eclipse` for export.
+display_eclipse = eclipse.rotate((0, 0, 0), (1, 0, 0), 180)
+display_eclipse = display_eclipse.translate(
+    (0, 0, -display_eclipse.val().BoundingBox().zmin)
+)
+display_eclipse = display_eclipse.rotate((0, 0, 0), (0, 0, 1), -90)
+
 if __name__ == "__main__":
-    show_object(eclipse, name="vessel_2_eclipse",
+    show_object(display_eclipse, name="vessel_2_eclipse",
                 options={"color": (250, 190, 60), "alpha": 1.0}, clear=True)
 
     dx, dy, dz = print_volume.extents(eclipse)
@@ -470,4 +477,5 @@ if __name__ == "__main__":
           f"{eclipse.val().Volume() / 1000:.1f} cm3")
     print(f"bed          {'fits' if print_volume.fits(eclipse) else 'DOES NOT FIT'}")
 
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     cq.exporters.export(eclipse, str(OUTPUT_DIR / "vessel_2_eclipse.step"))

@@ -1,13 +1,13 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
 """Vessel 2 Lid -- wheel-shaped lid, same design language as the LED Sun Lid
-(../led_sun_lid/lid.py), carrying the same LED ring light at its hub, but cut
-to Vessel 2's 118mm mouth instead of Vessel 1's 167mm.
+(../led_sun_lid/lid.py), carrying LED Ring Light 2 at its hub and cut to
+Vessel 2's 118mm mouth instead of Vessel 1's 167mm.
 
 At this vessel's opening, the ring light leaves far less room to spare: only
-14.25mm radial between the hub bore and the vessel wall, against 33mm on
+14.5mm radial between the hub bore and the vessel wall, against 33mm on
 Vessel 1. Kept the Sun Lid's 6mm rim and hub walls anyway (Brendan's call,
-2026-09-01) rather than thinning them to make room -- that leaves only 2.25mm
+2026-09-01) rather than thinning them to make room -- that leaves only 2.5mm
 of open annulus for the spokes to cross, so the lattice between hub and rim
 reads as narrow slits rather than open water. It is a near-solid disc with a
 ring-light hub, not a scaled-down Sun Lid in proportion.
@@ -44,11 +44,12 @@ OUTPUT_DIR = Path(__file__).parent / "output"
 
 # --- Interface dimensions ------------------------------------------------
 VESSEL_TOP_ID = specs.figure("vessel_2", "top_opening_id")
-LED_RING_OD = specs.figure("led_ring_light", "ring_od")
-RING_LIGHT_THICKNESS = specs.figure("led_ring_light", "ring_thickness")
-GLAND_DIA = specs.figure("led_ring_light", "gland_dia")
-GLAND_PROTRUSION = specs.figure("led_ring_light", "gland_protrusion")
-CABLE_DIA = specs.figure("led_ring_light", "cable_dia")
+RING_SPEC = "led_ring_light_2"
+LED_RING_OD = specs.figure(RING_SPEC, "ring_od")
+RING_LIGHT_THICKNESS = specs.figure(RING_SPEC, "ring_thickness")
+GLAND_DIA = specs.figure(RING_SPEC, "gland_dia")
+GLAND_PROTRUSION = specs.figure(RING_SPEC, "gland_protrusion")
+CABLE_DIA = specs.figure(RING_SPEC, "cable_dia")
 
 # --- Design parameters ---------------------------------------------------
 # Same as led_sun_lid/lid.py -- kept equal on purpose, see module docstring.
@@ -61,7 +62,7 @@ THICKNESS = 10.5
 SPOKE_COUNT = 6
 LIP_WIDTH = 2.0
 LIP_HEIGHT = 2.0
-HUB_BORE = 89.5  # same standard slip fit over the ring light, see spec/led_ring_light.md
+HUB_BORE = LED_RING_OD + 2 * specs.figure("fits", "ring_light_bore_radial")
 PASSTHROUGH_CLEARANCE = specs.figure("fits", "passthrough_radial")
 PASSTHROUGH_BLEND = 0.5
 PASSTHROUGH_ANGLE = 90.0
@@ -71,11 +72,11 @@ BLEND_MIN_EDGE = 0.5
 SLIP_CLEARANCE = HUB_BORE - LED_RING_OD  # 0.1428 diametral, 0.0714 radial
 OUTER_R = VESSEL_TOP_ID / 2  # 59.00
 RIM_IR = OUTER_R - WALL  # 53.00
-HUB_IR = HUB_BORE / 2  # 44.75 -- ring light drops in here
-HUB_OR = HUB_IR + WALL  # 50.75
-LIP_BORE_R = HUB_IR - LIP_WIDTH  # 42.75 -- ring light seats on this ledge
+HUB_IR = HUB_BORE / 2  # 44.50 -- Ring Light 2 drops in here
+HUB_OR = HUB_IR + WALL  # 50.50
+LIP_BORE_R = HUB_IR - LIP_WIDTH  # 42.50 -- ring light seats on this ledge
 
-# RIM_IR - HUB_OR = 2.25mm: the entire radial budget spokes have to cross,
+# RIM_IR - HUB_OR = 2.50mm: the entire radial budget spokes have to cross,
 # see module docstring. On the Sun Lid this gap is 26.75mm.
 
 GLAND_AXIS_Z = LIP_HEIGHT + RING_LIGHT_THICKNESS / 2  # 8.6675, unchanged from the Sun Lid
