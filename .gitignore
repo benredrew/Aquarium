@@ -6,9 +6,13 @@ __pycache__/
 test_fits/output/
 led_sun_lid/output/
 led_ring_light/output/
+led_ring_light_2/output/
 lid_screen/output/
 vessel/output/
 vessel_2_lid/output/
 vessel_2_eclipse/output/
+vessel_2_standin/output/
 eclipse_lid/output/
+ring_light_plug/output/
+saw_block/output/
 lamp_shade/output/

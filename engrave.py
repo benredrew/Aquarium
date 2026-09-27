@@ -1,6 +1,6 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Shared label engraving for cylindrical interface surfaces.
+"""Shared label engraving for interface surfaces, cylindrical and flat.
 
 Interface diameters are engraved (cut in), never raised -- a raised boss would
 add to the effective OD and subtract from the effective ID, corrupting the very
@@ -134,3 +134,37 @@ def labelled_ring(od, wall, height):
         ring, f"{inner_d:.0f}", inner_d / 2, -1, height / 2, theta0=math.pi
     )
     return ring
+
+
+def engrave_planar_text(base, txt, origin, normal, x_dir, size=FONT_SIZE):
+    """Engrave `txt` into a flat face, centred on `origin`.
+
+    The cylindrical engraver exists because a flat cut cannot track a curved
+    wall; on a flat face that problem disappears, so the whole string is cut
+    from one plane and none of the per-character machinery applies. No width
+    scaling either -- WIDTH_SCALE compensates for the way a curved surface
+    foreshortens text as it falls away from the viewer, and a flat face does
+    not.
+
+    normal points out of the face; the cut runs ENGRAVE_DEPTH into it. x_dir is
+    the reading direction, which must be chosen for the face being read: for a
+    wall seen from +Y, reading left to right means x_dir = -X.
+    """
+    plane = cq.Plane(
+        origin=cq.Vector(origin), xDir=cq.Vector(x_dir), normal=cq.Vector(normal)
+    )
+    cutter = (
+        cq.Workplane(plane)
+        .workplane(offset=-ENGRAVE_DEPTH)
+        .text(
+            txt,
+            size,
+            ENGRAVE_DEPTH + OVERSHOOT,
+            combine=False,
+            kind="bold",
+            fontPath=FONT_PATH,
+            halign="center",
+            valign="center",
+        )
+    )
+    return base.cut(cutter)
