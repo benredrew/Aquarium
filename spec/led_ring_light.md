@@ -2,7 +2,7 @@
 Author: Claude (Sonnet 5)
 Co-Author: Brendan Fennell
 -->
-# LED Ring Light — Specifications
+# LED Ring Light 1 — Specifications
 
 Confirmed specifications of the LED ring light carried by the LED Sun Lid. Only record values that have been measured or taken from the manufacturer — not trial values used in scripts.
 
@@ -50,4 +50,5 @@ Resulting envelope, measured from the ring axis along +Y:
 - Seating: the light rests on the lid's 2mm lip, putting its gland axis at z = 8.6675 in lid coordinates. Its 13.335 thickness then stands 4.835mm proud of the 10.5mm lid.
 - The lid is 10.5mm rather than a round 10mm so its top chamfer clears the passthrough pocket's tangent seam at z = 8.6675. At 10mm the chamfer started 0.33mm above that seam and pinched out slivers too short to blend, leaving the cable exit sharp.
 - Reference model: `led_ring_light/ring_light.py` — mock of the component, not a printed part.
+- The reference model is engraved **1** on top for visual identification.
 - Related test fit: `test_fits/led_ring.py` (90mm bore, the first whole millimetre above the OD).

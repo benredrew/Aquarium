@@ -1,6 +1,6 @@
 # Author: Claude (Sonnet 5)
 # Co-Author: Brendan Fennell
-"""Mock model of the LED ring light itself (see ../spec/led_ring_light.md).
+"""Mock model of LED Ring Light 1 (see ../spec/led_ring_light.md).
 
 This is a reference component, not a printed part -- it exists so the lid and
 the test fits can be checked against the real envelope, including the cable
@@ -9,6 +9,7 @@ gland and cable that have to pass through the lid.
 Axes: ring primary axis is Z, ring sits z=0..THICKNESS. The gland and cable are
 coaxial and protrude along +Y at mid-thickness.
 """
+import os
 import sys
 from pathlib import Path
 
@@ -61,13 +62,35 @@ RECESS_OR = RING_OD / 2 - LAND_WIDTH  # 43.6786
 
 Y_AXIS = cq.Vector(0, 1, 0)
 
+LABEL = "1"
+LABEL_SIZE = 8.0
+LABEL_DEPTH = 0.5
+LABEL_OVERSHOOT = 0.1
+FONT_PATH = os.environ.get("AQUARIUM_FONT_PATH")
 
-def build_ring_light():
+
+def build_ring_light(
+    ring_od=RING_OD,
+    ring_id=RING_ID,
+    ring_thickness=RING_THICKNESS,
+    cable_dia=CABLE_DIA,
+    gland_dia=GLAND_DIA,
+    gland_protrusion=GLAND_PROTRUSION,
+    cable_protrusion=CABLE_PROTRUSION,
+    label=LABEL,
+):
+    mid_z = ring_thickness / 2
+    gland_face_y = ring_od / 2 + gland_protrusion
+    gland_start_y = ring_od / 2 - GLAND_EMBED
+    cable_tip_y = gland_face_y + cable_protrusion
+    recess_ir = ring_id / 2 + LAND_WIDTH
+    recess_or = ring_od / 2 - LAND_WIDTH
+
     ring = (
         cq.Workplane("XY")
-        .circle(RING_OD / 2)
-        .circle(RING_ID / 2)
-        .extrude(RING_THICKNESS)
+        .circle(ring_od / 2)
+        .circle(ring_id / 2)
+        .extrude(ring_thickness)
     )
 
     # Top face has exactly two circular edges; index 0 is the bore, 1 the rim.
@@ -77,16 +100,34 @@ def build_ring_light():
 
     ring = ring.cut(
         cq.Workplane("XY")
-        .circle(RECESS_OR)
-        .circle(RECESS_IR)
+        .circle(recess_or)
+        .circle(recess_ir)
         .extrude(RECESS_DEPTH)
     )
 
+    # A shallow numeral in the flat top annulus distinguishes the two sizes
+    # in OCPViewer without changing any interface surface.
+    label_radius = (ring_od + ring_id) / 4
+    label_cutter = (
+        cq.Workplane("XY")
+        .workplane(offset=ring_thickness - LABEL_DEPTH)
+        .center(-label_radius, 0)
+        .text(
+            label,
+            LABEL_SIZE,
+            LABEL_DEPTH + LABEL_OVERSHOOT,
+            combine=False,
+            kind="bold",
+            fontPath=FONT_PATH,
+        )
+    )
+    ring = ring.cut(label_cutter)
+
     gland = cq.Workplane(
         obj=cq.Solid.makeCylinder(
-            GLAND_DIA / 2,
-            GLAND_FACE_Y - GLAND_START_Y,
-            cq.Vector(0, GLAND_START_Y, MID_Z),
+            gland_dia / 2,
+            gland_face_y - gland_start_y,
+            cq.Vector(0, gland_start_y, mid_z),
             Y_AXIS,
         )
     )
@@ -95,9 +136,9 @@ def build_ring_light():
     # the CABLE_PROTRUSION beyond the gland face is actually visible.
     cable = cq.Workplane(
         obj=cq.Solid.makeCylinder(
-            CABLE_DIA / 2,
-            CABLE_TIP_Y - GLAND_START_Y,
-            cq.Vector(0, GLAND_START_Y, MID_Z),
+            cable_dia / 2,
+            cable_tip_y - gland_start_y,
+            cq.Vector(0, gland_start_y, mid_z),
             Y_AXIS,
         )
     )
@@ -108,5 +149,5 @@ def build_ring_light():
 ring_light = build_ring_light()
 
 if __name__ == "__main__":
-    show_object(ring_light, name="led_ring_light")
+    show_object(ring_light, name="led_ring_light_1")
     cq.exporters.export(ring_light, str(OUTPUT_DIR / "ring_light.step"))
