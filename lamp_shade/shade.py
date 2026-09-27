@@ -54,14 +54,12 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import cadquery as cq
-import drafting
 import print_volume
 import specs
 from cadquery.selectors import Selector
+from cadkit import sheet as cad_sheet
+from cadkit import viewer as cad_viewer
 from engrave import engrave_radial_text
-from ocp_vscode import set_port, show_object
-
-set_port(3939)
 
 OUTPUT_DIR = Path(__file__).parent / "output"
 
@@ -467,13 +465,18 @@ _LEAN = math.cos(math.radians(WALL_FROM_VERTICAL))
 NORMAL_WALL_BRIM = (BRIM_R - SHADE_IR0) * _LEAN
 NORMAL_WALL_HUB = (HUB_OR - HUB_IR) * _LEAN
 
-if __name__ == "__main__":
-    show_object(
-        print_shade,
-        name="lamp_shade",
-        options={"color": (250, 190, 60), "alpha": 1.0},
-        clear=True,
-    )
+def _report(args):
+    """Build is unconditional; viewing and the drawing are asked for.
+
+    Nothing in here may *require* a viewer or a sheet. Regenerating the solid
+    is the cheap, headless thing an agent does constantly; making it depend on
+    a GUI being up, or on several seconds of hidden-line projection, taxes
+    every one of those runs. `cad_viewer.show` reports an absent viewer and
+    returns False rather than raising, so `--show` is safe to leave on.
+    """
+    if args.show:
+        cad_viewer.show(print_shade, name="lamp_shade", port=args.port,
+                        color=(250, 190, 60), alpha=1.0)
 
     dx, dy, dz = print_volume.extents(print_shade)
     n = len(shade_points(BRIM_R, HUB_OR)) - 1
@@ -507,10 +510,16 @@ if __name__ == "__main__":
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     cq.exporters.export(print_shade, str(OUTPUT_DIR / "lamp_shade.step"))
 
+    if not args.sheet:
+        print("sheet        skipped (--sheet to draw it)")
+        return
+
     # The drawing is an output of the model, not a thing made by hand once and
-    # left to rot: it is regenerated on every run from the same solid that is
-    # exported, so it cannot describe a part that no longer exists.
-    sheet_path = drafting.sheet(
+    # left to rot: it is regenerated from the same solid that is exported, so
+    # it cannot describe a part that no longer exists. It is off by default
+    # only because hidden-line projection costs seconds that a plain rebuild
+    # should not have to pay.
+    sheet_path = cad_sheet.sheet(
         print_shade, str(OUTPUT_DIR / "lamp_shade_sheet.svg"), "LAMP SHADE",
         fields=[
             ("PART", "lamp_shade/shade.py"),
@@ -522,3 +531,18 @@ if __name__ == "__main__":
         ],
     )
     print(f"sheet        {sheet_path}")
+
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--show", dest="show", action="store_true", default=True,
+                        help="push to a viewer if one is up (the default)")
+    parser.add_argument("--no-show", dest="show", action="store_false",
+                        help="do not push to a viewer even if one is up")
+    parser.add_argument("--sheet", action="store_true",
+                        help="also write the drawing sheet")
+    parser.add_argument("--port", type=int, default=None,
+                        help="viewer port (default: CAD_VIEWER_PORT, else found)")
+    _report(parser.parse_args())
