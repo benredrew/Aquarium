@@ -89,11 +89,15 @@ yours. Start your own on a genuinely free port -- 3939 is this service and
 
 ```bash
 toolbox viewer --status    # who is up
-toolbox viewer             # start one on a free port
+toolbox preview --name aquarium-agent -- ./preview lamp_shade/shade.py
 ```
 
-It prints `CAD_VIEWER_PORT=<n>`; export that and `cad_viewer.show` uses it.
-Kill it when you are done.
+`toolbox preview` reserves or starts a viewer, opens its browser, waits until
+the browser has registered, then runs the part command with its isolated
+`CAD_VIEWER_PORT`. Do not start a viewer and independently push a model: the
+underlying OCP viewer discards a model sent before its browser connects. A
+plain `./preview` remains the headless rebuild path. The viewer persists after
+the command; close it when you are done.
 
 ## You are not alone in this working tree
 
