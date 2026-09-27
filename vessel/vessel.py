@@ -313,7 +313,8 @@ LABEL_ANGLE = 0.0        # +X, and every label shares it
 # Inked height of a digit at the shared font size, measured rather than assumed.
 LABEL_HEIGHT = (
     cq.Workplane("XY")
-    .text("8", engrave.FONT_SIZE, 1.0, combine=False, kind="bold")
+    .text("8", engrave.FONT_SIZE, 1.0, combine=False, kind="bold",
+          fontPath=engrave.FONT_PATH)
     .val().BoundingBox().ylen
 )
 

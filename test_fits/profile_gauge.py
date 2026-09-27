@@ -327,6 +327,7 @@ def engrave_face_text(shape, txt, x, z):
             kind="bold",
             halign="center",
             valign="center",
+            fontPath=engrave.FONT_PATH,
         )
     )
     return shape.cut(cutter_)
@@ -336,7 +337,8 @@ def text_width(txt):
     """Inked width of `txt` at the shared font size, measured not assumed."""
     return (
         cq.Workplane("XY")
-        .text(txt, engrave.FONT_SIZE, 1.0, combine=False, kind="bold")
+        .text(txt, engrave.FONT_SIZE, 1.0, combine=False, kind="bold",
+              fontPath=engrave.FONT_PATH)
         .val()
         .BoundingBox()
         .xlen

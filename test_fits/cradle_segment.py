@@ -78,7 +78,8 @@ MARGIN = WINDOW_HALF - ARC / 2  # clear degrees either side of the arc
 # stay clear whatever the radius under test happens to be.
 LABEL_LINE_HEIGHT = (
     cq.Workplane("XY")
-    .text("8", engrave_module.FONT_SIZE, 1.0, combine=False, kind="bold")
+    .text("8", engrave_module.FONT_SIZE, 1.0, combine=False, kind="bold",
+          fontPath=engrave_module.FONT_PATH)
     .val()
     .BoundingBox()
     .ylen
