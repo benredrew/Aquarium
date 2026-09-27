@@ -54,7 +54,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import cadquery as cq
-import drawing
+import drafting
 import print_volume
 import specs
 from cadquery.selectors import Selector
@@ -510,7 +510,7 @@ if __name__ == "__main__":
     # The drawing is an output of the model, not a thing made by hand once and
     # left to rot: it is regenerated on every run from the same solid that is
     # exported, so it cannot describe a part that no longer exists.
-    sheet_path = drawing.sheet(
+    sheet_path = drafting.sheet(
         print_shade, str(OUTPUT_DIR / "lamp_shade_sheet.svg"), "LAMP SHADE",
         fields=[
             ("PART", "lamp_shade/shade.py"),

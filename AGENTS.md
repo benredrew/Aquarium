@@ -32,14 +32,17 @@ Until then it stays a literal in the script dialling it in, and the evidence
 goes in `PRINT_LOG.md`. Do not promote a figure because it seems right, and do
 not fill in a Confirmed date you did not witness.
 
-## Drawings: `drawing.py`
+## Drawings: the shared `drafting` package
 
-Every part gets the same sheet, and it is generated, never drawn by hand:
+Every part gets the same sheet, and it is generated, never drawn by hand. The
+generator is **not in this repository** -- it lives in `~/Projects/drafting`
+and is shared with the other CAD projects, installed into `.venv` by a `.pth`
+file. See `~/Projects/drafting/AGENTS.md`.
 
 ```python
-import drawing
-drawing.sheet(solid, "output/<part>_sheet.svg", "PART NAME",
-              fields=[("PART", "dir/file.py"), ("ENVELOPE", "...")])
+import drafting
+drafting.sheet(solid, "output/<part>_sheet.svg", "PART NAME",
+               fields=[("PART", "dir/file.py"), ("ENVELOPE", "...")])
 ```
 
 Four views to one common scale — FRONT, SECTION A-A top right, PLAN,
@@ -53,7 +56,7 @@ Two things to know before you reach for something else:
   projection with the two-argument `gp_Ax2`, which lets OCCT invent the X
   axis, so the roll of each view is arbitrary — elevations come out on their
   side and isometrics upside down. Rotating the output afterwards is guesswork
-  that has to be redone per part. `drawing.py` takes a view direction *and* an
+  that has to be redone per part. `drafting` takes a view direction *and* an
   up vector and orients the shape before projecting.
 - **Sheets are dark on screen and light on paper.** The dark palette rides on
   presentation attributes; a `@media print` block carries the light one and
@@ -69,14 +72,16 @@ them is a source file; never hand-edit one.
 `aquarium-viewer.service` listens on **127.0.0.1:3939**, and every session on
 this machine pushes to it. Two agents working at once silently overwrite each
 other's scene, and you will screenshot someone else's model believing it is
-yours. Start your own instead:
+yours. Start your own on a free port instead -- **check first**, because 3939
+is this service and 3940 is already `~/Projects/Oil_Shelf/viewer`:
 
 ```bash
-.venv/bin/python viewer_server.py --host 127.0.0.1 --port 3940 &
-omarchy launch webapp http://127.0.0.1:3940/
+ss -ltn | grep -E '39[0-9][0-9]'          # pick one nobody holds
+.venv/bin/python viewer_server.py --host 127.0.0.1 --port <free> &
+omarchy launch webapp http://127.0.0.1:<free>/
 ```
 
-then `set_port(3940)` before `show_object`. Kill it when you are done.
+then `set_port(<free>)` before `show_object`. Kill it when you are done.
 
 ## You are not alone in this working tree
 
